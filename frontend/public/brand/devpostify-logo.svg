@@ -1,0 +1,87 @@
+<svg
+  width="900"
+  height="260"
+  viewBox="0 0 900 260"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <defs>
+    <linearGradient
+      id="novaGradient"
+      x1="40"
+      y1="40"
+      x2="860"
+      y2="220"
+      gradientUnits="userSpaceOnUse"
+    >
+      <stop stop-color="#2563EB" />
+      <stop offset="1" stop-color="#7C3AED" />
+    </linearGradient>
+  </defs>
+
+  <rect width="900" height="260" rx="32" fill="#020617" />
+
+  <g transform="translate(35 25) scale(.41)">
+    <rect width="512" height="512" rx="96" fill="#020617" />
+    <path
+      d="M112 80H286C365 80 424 139 424 216V296C424 375 365 432 286 432H112V80Z"
+      fill="url(#novaGradient)"
+    />
+    <path
+      d="M112 112H274C337 112 392 161 392 224V288C392 351 337 400 274 400H144V112H112Z"
+      fill="#020617"
+    />
+    <path
+      d="M156 178L208 230L156 282"
+      stroke="white"
+      stroke-width="22"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M226 282H274"
+      stroke="white"
+      stroke-width="22"
+      stroke-linecap="round"
+    />
+    <path
+      d="M316 164C338 164 354 181 354 203V213C354 236 369 249 388 256C369 263 354 276 354 299V309C354 331 338 348 316 348"
+      stroke="url(#novaGradient)"
+      stroke-width="18"
+      stroke-linecap="round"
+    />
+  </g>
+
+  <text
+    x="275"
+    y="122"
+    fill="white"
+    font-family="Arial, sans-serif"
+    font-size="62"
+    font-weight="700"
+  >
+    Dev
+  </text>
+
+  <text
+    x="410"
+    y="122"
+    fill="url(#novaGradient)"
+    font-family="Arial, sans-serif"
+    font-size="62"
+    font-weight="700"
+  >
+    Postify
+  </text>
+
+  <text
+    x="278"
+    y="166"
+    fill="#CBD5E1"
+    font-family="Arial, sans-serif"
+    font-size="19"
+    letter-spacing="2"
+  >
+    WHERE DEVELOPERS BUILD THEIR IDENTITY.
+  </text>
+</svg>
