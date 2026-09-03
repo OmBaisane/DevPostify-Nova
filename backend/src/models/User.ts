@@ -42,7 +42,7 @@ const userSchema = new Schema(
       default: "",
     },
 
-    avtar: {
+    avatar: {
       type: String,
       default: "",
     },

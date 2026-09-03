@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { z } from "zod";
+import type { SignOptions } from "jsonwebtoken";
 
 const envSchema = z.object({
   NODE_ENV: z
@@ -12,9 +13,11 @@ const envSchema = z.object({
 
   MONGODB_URI: z.string().optional(),
 
-  JWT_SECRET: z.string().min(32).optional(),
+  JWT_SECRET: z.string().min(32),
 
-  JWT_EXPIRES_IN: z.string().default("7d"),
+  JWT_EXPIRES_IN: z.string().default("7d") as z.ZodType<
+    SignOptions["expiresIn"]
+  >,
 
   CLOUDINARY_CLOUD_NAME: z.string().optional(),
   CLOUDINARY_API_KEY: z.string().optional(),
