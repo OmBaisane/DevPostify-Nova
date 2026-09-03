@@ -185,3 +185,13 @@ export const getMe = async (req: Request, res: Response) => {
     },
   });
 };
+
+export const logout = async (_req: Request, res: Response) => {
+  res.clearCookie(COOKIE_NAME, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+
+  return sendSuccess(res, 200, "Logout successful");
+};
