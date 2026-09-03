@@ -1,6 +1,6 @@
 # DevPostify Nova — Project Context
 
-## Product
+## Project Identity
 
 Public Name: DevPostify
 
@@ -8,21 +8,63 @@ Development Name: DevPostify Nova
 
 Tagline: Where Developers Build Their Identity.
 
-DevPostify is a developer-first professional social platform where developers can share technical knowledge, showcase projects and expertise, discover useful technical content, save valuable posts, and build a professional developer identity.
+DevPostify is a developer-first professional social platform where developers can:
 
-The product should feel modern, premium, professional, developer-first, and SaaS-like — not like a generic social-media clone.
+- Share technical knowledge
+- Showcase projects and expertise
+- Build a professional developer identity
+- Discover useful technical content
+- Save valuable posts
+
+Product direction:
+
+Modern, premium, professional, developer-first, and SaaS-like.
+
+It must NOT feel like a generic social-media clone.
 
 ---
 
-# Locked Product Scope
+# Core Development Rules
 
-## V1 Features
+- Build DevPostify Nova completely from scratch.
+- Old DevPostify is reference-only and must never become a dependency.
+- Do not blindly copy the old project.
+- V1 scope is locked.
+- Do not add features outside V1.
+- Avoid unnecessary over-engineering.
+- Prefer practical production-grade solutions.
+- Do not ask about minor implementation decisions.
+- Make sensible technical decisions and continue.
+- Verify important work before moving forward.
+- Prioritize implementation over excessive discussion.
+- Keep code clean, maintainable, reusable, and understandable.
+- Never silently change a locked decision.
 
-### Landing
+Development workflow:
+
+PLAN
+↓
+EXECUTE
+↓
+VERIFY
+↓
+TEST
+↓
+COMMIT
+↓
+PUSH
+↓
+NEXT
+
+---
+
+# V1 Scope — LOCKED
+
+## Landing
 
 - Landing page
 
-### Authentication
+## Authentication
 
 - Register
 - Login
@@ -30,7 +72,7 @@ The product should feel modern, premium, professional, developer-first, and SaaS
 - JWT authentication
 - Protected routes
 
-### Posts
+## Posts
 
 - Feed
 - Create post
@@ -41,30 +83,30 @@ The product should feel modern, premium, professional, developer-first, and SaaS
 - Code highlighting
 - Categories
 
-### Profile
+## Profile
 
 - View profile
 - Edit profile
 - My posts
 
-### Discovery
+## Discovery
 
 - Search
 - Category filtering
 
-### Bookmarks
+## Bookmarks
 
 - Bookmark post
 - Remove bookmark
 - View bookmarks
 
-### Settings
+## Settings
 
 - Dark mode by default
 - Light mode
 - Account settings
 
-### UX
+## UX
 
 - Responsive design
 - Loading/skeleton states
@@ -76,7 +118,7 @@ The product should feel modern, premium, professional, developer-first, and SaaS
 
 ---
 
-# Explicitly Out of V1
+# Explicitly NOT in V1
 
 - Chat
 - AI
@@ -87,13 +129,9 @@ The product should feel modern, premium, professional, developer-first, and SaaS
 - Video
 - Realtime features
 
-Do not add features outside V1 without an explicit product decision.
-
 ---
 
-# Locked Design System
-
-## Colors
+# Design System — LOCKED
 
 Primary:
 #2563EB
@@ -104,68 +142,55 @@ Accent:
 Gradient:
 Blue → Violet
 
-Dark mode is the default.
+Theme:
 
-Light mode is supported.
+- Dark mode by default
+- Light mode supported
 
-## Typography
+Typography:
 
-Headings:
-Poppins
-
-Body:
-Inter
-
-Code:
-JetBrains Mono
-
-## Layout
+- Poppins — headings
+- Inter — body
+- JetBrains Mono — code
 
 Spacing:
+
 8px system
 
-Cards:
-16px radius
+Radius:
 
-Buttons:
-12px radius
+- Cards: 16px
+- Buttons: 12px
+- Inputs: 12px
 
-Inputs:
-12px radius
+Accessibility:
 
-Maximum content width:
-1280px
-
-## Accessibility
-
-- Visible focus states
-- Keyboard-friendly interactions
 - Semantic HTML
-- Accessible form controls
+- Keyboard-friendly interactions
+- Visible focus states
+- Accessible forms
 - Sufficient color contrast
 - Responsive layouts
-- Loading, empty, and error states
+- Loading/empty/error states
 
 ---
 
 # Branding
 
-Provided logo image is the visual reference.
+Provided logo is the visual branding reference.
 
-Branding should be recreated as clean scalable SVG assets.
+Branding is recreated as scalable SVG assets.
 
 Current assets:
 
-- `frontend/public/brand/devpostify-mark.svg`
-- `frontend/public/brand/devpostify-logo.svg`
+- frontend/public/brand/devpostify-mark.svg
+- frontend/public/brand/devpostify-logo.svg
 
-The symbol-only mark is used as the favicon.
-
-The UI wordmark should remain flexible and use the product typography system where appropriate.
+Symbol-only mark is used as favicon.
 
 ---
 
-# Locked Technology Stack
+# Technology Stack — LOCKED
 
 ## Frontend
 
@@ -202,7 +227,7 @@ Render
 
 ---
 
-# Architecture
+# Architecture — LOCKED
 
 Frontend
 ↓
@@ -218,7 +243,17 @@ Frontend and backend are separate applications.
 
 ---
 
-# Repository Structure
+# Repository
+
+Repository:
+
+DevPostify-Nova
+
+Fresh Git repository.
+
+Old DevPostify Git history is not reused.
+
+Structure:
 
 ```text
 DevPostify-Nova/
