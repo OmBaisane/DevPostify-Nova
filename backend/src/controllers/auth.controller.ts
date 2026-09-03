@@ -6,6 +6,7 @@ import {
   comparePassword,
 } from "../utils/auth.js";
 import { sendSuccess } from "../utils/apiResponse.js";
+import { success } from "zod";
 
 const COOKIE_NAME = "devpostify_token";
 
@@ -154,4 +155,33 @@ export const login = async (req: Request, res: Response) => {
 
 const normalizedPasswordLength = (password: string): boolean => {
   return password.length < 8;
+};
+
+export const getMe = async (req: Request, res: Response) => {
+  if (!req.userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Authentication required",
+    });
+  }
+
+  const user = await UserModel.findById(req.userId);
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  return sendSuccess(res, 200, "Current user fetched successfully", {
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      name: user.name,
+      bio: user.bio,
+      avatar: user.avatar,
+    },
+  });
 };
