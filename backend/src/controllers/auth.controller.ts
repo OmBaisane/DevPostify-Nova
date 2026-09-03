@@ -1,6 +1,10 @@
 import type { Request, Response } from "express";
 import { UserModel } from "../models/User.js";
-import { hashPassword, createAccessToken } from "../utils/auth.js";
+import {
+  hashPassword,
+  createAccessToken,
+  comparePassword,
+} from "../utils/auth.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 
 const COOKIE_NAME = "devpostify_token";
@@ -77,6 +81,66 @@ export const register = async (req: Request, res: Response) => {
   });
 
   return sendSuccess(res, 201, "Account created successfully", {
+    user: {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      name: user.name,
+      bio: user.bio,
+      avatar: user.avatar,
+    },
+  });
+};
+
+export const login = async (req: Request, res: Response) => {
+  const { email, password } = req.body;
+
+  if (typeof email !== "string" || typeof password !== "string") {
+    return res.status(400).json({
+      success: false,
+      message: "Email and password are required",
+    });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (!normalizedEmail || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and password are required",
+    });
+  }
+
+  const user = await UserModel.findOne({
+    email: normalizedEmail,
+  }).select("+password");
+
+  if (!user) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid email or password",
+    });
+  }
+
+  const isPasswordValid = await comparePassword(password, user.password);
+
+  if (!isPasswordValid) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid email or password",
+    });
+  }
+
+  const token = createAccessToken(user._id.toString());
+
+  res.cookie(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  return sendSuccess(res, 200, "Login successful", {
     user: {
       id: user._id,
       username: user.username,
