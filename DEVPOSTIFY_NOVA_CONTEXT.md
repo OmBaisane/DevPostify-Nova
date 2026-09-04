@@ -1,14 +1,32 @@
-# DevPostify Nova — Project Context
+# DEVPOSTIFY NOVA — PROJECT CONTEXT
 
-## Project Identity
+> This file is the source of truth for DevPostify Nova continuity across development sessions.
+> Update it only at meaningful milestones.
+> Do not add unnecessary temporary debugging details.
 
-Public Name: DevPostify
+---
 
-Development Name: DevPostify Nova
+# 1. PROJECT IDENTITY
 
-Tagline: Where Developers Build Their Identity.
+## Public Name
 
-DevPostify is a developer-first professional social platform where developers can:
+DevPostify
+
+## Development Name
+
+DevPostify Nova
+
+## Tagline
+
+Where Developers Build Their Identity.
+
+## Project Type
+
+Developer-first professional social platform.
+
+## Product Vision
+
+DevPostify is a modern professional platform for developers to:
 
 - Share technical knowledge
 - Showcase projects and expertise
@@ -16,29 +34,33 @@ DevPostify is a developer-first professional social platform where developers ca
 - Discover useful technical content
 - Save valuable posts
 
-Product direction:
+The product should feel:
 
-Modern, premium, professional, developer-first, and SaaS-like.
+- Modern
+- Premium
+- Professional
+- Developer-first
+- SaaS-like
 
 It must NOT feel like a generic social-media clone.
 
 ---
 
-# Core Development Rules
+# 2. DEVELOPMENT PRINCIPLES
 
-- Build DevPostify Nova completely from scratch.
-- Old DevPostify is reference-only and must never become a dependency.
-- Do not blindly copy the old project.
-- V1 scope is locked.
-- Do not add features outside V1.
-- Avoid unnecessary over-engineering.
-- Prefer practical production-grade solutions.
-- Do not ask about minor implementation decisions.
-- Make sensible technical decisions and continue.
-- Verify important work before moving forward.
-- Prioritize implementation over excessive discussion.
+- Build from scratch.
+- Old DevPostify is optional reference only.
+- New project must never depend on the old project.
+- Quality and speed are equally important.
+- Build step-by-step through meaningful milestones.
+- Do not over-engineer V1.
+- Do not add features outside the locked V1 scope.
+- Prefer practical production-ready solutions.
 - Keep code clean, maintainable, reusable, and understandable.
-- Never silently change a locked decision.
+- Verify important work before moving forward.
+- Avoid unnecessary discussions for normal technical decisions.
+- Ask only when a genuinely important product/architecture decision cannot reasonably be determined.
+- Implementation takes priority over excessive theory.
 
 Development workflow:
 
@@ -52,13 +74,11 @@ TEST
 ↓
 COMMIT
 ↓
-PUSH
-↓
 NEXT
 
 ---
 
-# V1 Scope — LOCKED
+# 3. LOCKED V1 FEATURES
 
 ## Landing
 
@@ -118,7 +138,9 @@ NEXT
 
 ---
 
-# Explicitly NOT in V1
+# 4. EXPLICITLY OUTSIDE V1
+
+Do NOT build these features in V1:
 
 - Chat
 - AI
@@ -129,9 +151,13 @@ NEXT
 - Video
 - Realtime features
 
+Do not silently expand the V1 scope.
+
 ---
 
-# Design System — LOCKED
+# 5. DESIGN SYSTEM
+
+## Colors
 
 Primary:
 #2563EB
@@ -142,55 +168,50 @@ Accent:
 Gradient:
 Blue → Violet
 
-Theme:
+## Theme
 
-- Dark mode by default
-- Light mode supported
+- Dark mode is the default.
+- Light mode is supported.
 
-Typography:
+## Typography
 
 - Poppins — headings
 - Inter — body
 - JetBrains Mono — code
 
-Spacing:
+## Spacing
 
-8px system
+8px spacing system.
 
-Radius:
+## Radius
 
-- Cards: 16px
-- Buttons: 12px
-- Inputs: 12px
+Cards:
+16px
 
-Accessibility:
+Buttons:
+12px
 
-- Semantic HTML
-- Keyboard-friendly interactions
-- Visible focus states
-- Accessible forms
-- Sufficient color contrast
-- Responsive layouts
-- Loading/empty/error states
+Inputs:
+12px
 
----
+## Branding
 
-# Branding
+The provided DevPostify logo reference is the branding source.
 
-Provided logo is the visual branding reference.
+Branding assets should be recreated as:
 
-Branding is recreated as scalable SVG assets.
+- Clean SVG/vector assets
+- Scalable
+- Reusable
+- Production-ready
 
-Current assets:
+Favicon:
 
-- frontend/public/brand/devpostify-mark.svg
-- frontend/public/brand/devpostify-logo.svg
-
-Symbol-only mark is used as favicon.
+- Symbol-only logo mark
 
 ---
 
-# Technology Stack — LOCKED
+# 6. TECH STACK
 
 ## Frontend
 
@@ -220,14 +241,34 @@ Symbol-only mark is used as favicon.
 ## Deployment
 
 Frontend:
-Vercel
+
+- Vercel
 
 Backend:
-Render
+
+- Render
+
+Use current stable and compatible versions at setup time.
+
+Avoid unnecessary dependencies.
 
 ---
 
-# Architecture — LOCKED
+# 7. ARCHITECTURE
+
+One GitHub repository:
+
+DevPostify-Nova/
+
+    frontend/
+    backend/
+    README.md
+    .gitignore
+    DEVPOSTIFY_NOVA_CONTEXT.md
+
+Frontend and backend are separate applications.
+
+Architecture:
 
 Frontend
 ↓
@@ -239,27 +280,599 @@ MongoDB Atlas
 
 The frontend must NEVER connect directly to MongoDB.
 
-Frontend and backend are separate applications.
+---
+
+# 8. DATABASE
+
+V1 collections:
+
+- users
+- posts
+- bookmarks
+
+Database principles:
+
+- Sensible validation
+- Proper relationships
+- Timestamps
+- Useful indexes
+- Reasonable query performance
+- No unnecessary database complexity
 
 ---
 
-# Repository
+# 9. REST API DIRECTION
+
+Authentication:
+
+POST /api/auth/register
+POST /api/auth/login
+
+Posts:
+
+GET /api/posts
+GET /api/posts/:id
+POST /api/posts
+PATCH /api/posts/:id
+DELETE /api/posts/:id
+
+Profile:
+
+GET /api/profile/:username
+PATCH /api/profile
+
+Bookmarks:
+
+GET /api/bookmarks
+POST /api/bookmarks/:postId
+DELETE /api/bookmarks/:postId
+
+API rules:
+
+- REST architecture
+- Consistent success/error responses
+- Authentication where required
+- Ownership authorization for user-owned resources
+- Validate request input
+- Validate MongoDB IDs
+- Avoid unnecessary API complexity
+
+---
+
+# 10. PROJECT STRUCTURE
+
+## Frontend
+
+Next.js App Router with a practical feature-oriented structure.
+
+## Backend
+
+Express backend with clear separation between:
+
+- Routes
+- Validation
+- Controllers
+- Services when genuinely useful
+- Models
+- Middleware
+- Utilities
+- Configuration
+
+Do not introduce unnecessary abstraction.
+
+---
+
+# 11. CURRENT DEVELOPMENT STATUS
+
+## Milestone 1 — Project Setup
+
+Status:
+COMPLETE
+
+Completed:
+
+- Fresh DevPostify Nova project initialized
+- Frontend initialized
+- Backend initialized
+- Git repository configured
+- GitHub remote configured
+- Initial project pushed to GitHub
+- Basic development environment verified
+
+Environment versions used during setup:
+
+- Node.js: v22.17.0
+- npm: v10.9.2
+- Git: 2.54.0.windows.1
+
+---
+
+# 12. MILESTONE 2 — DESIGN / SYSTEM FOUNDATION
+
+Status:
+COMPLETE
+
+Completed:
+
+- Design direction established
+- Branding direction established
+- Dark-first theme direction
+- Typography system
+- Color system
+- Spacing system
+- Radius system
+- Responsive/accessibility principles
+- UI foundation
+
+---
+
+# 13. MILESTONE 3 — BACKEND FOUNDATION
+
+Status:
+COMPLETE
+
+Completed:
+
+- Express backend foundation
+- TypeScript backend setup
+- Environment configuration
+- MongoDB connection
+- Application/server separation
+- Middleware foundation
+- Error handling foundation
+- API structure
+- Mongoose foundation
+
+---
+
+# 14. MILESTONE 4 — DATABASE / MONGOOSE FOUNDATION
+
+Status:
+COMPLETE
+
+Completed:
+
+- MongoDB Atlas integration
+- Mongoose configuration
+- User model foundation
+- Post model foundation
+- Bookmark model foundation
+- Schema validation foundations
+- Timestamps and relationships
+- Relevant database structure
+
+Important model correction completed:
+
+- `auther` was corrected to `author` in the Post model.
+
+---
+
+# 15. MILESTONE 5 — AUTHENTICATION
+
+Status:
+COMPLETE
+
+Implemented and verified:
+
+- User registration
+- User login
+- User logout
+- Password hashing
+- JWT generation
+- JWT verification
+- HTTP-only authentication cookie
+- Authentication middleware
+- Protected routes
+- Authenticated user identification
+- `GET /api/auth/me`
+- Request typing for authenticated user ID
+- Authentication validation/error handling
+
+Authentication is considered complete.
+
+Do not rebuild Milestone 5 unless a later feature exposes a real defect.
+
+---
+
+# 16. MILESTONE 6 — POSTS SYSTEM
+
+Status:
+COMPLETE
+
+Posts API is fully implemented and pushed to GitHub.
+
+## Create Post
+
+Implemented:
+
+POST /api/posts
+
+Supports:
+
+- title
+- content
+- category
+- tags
+- optional cover image URL
+- authenticated author assignment
+- request validation
+
+Status:
+COMPLETE
+
+## Feed
+
+Implemented:
+
+GET /api/posts
+
+Supports:
+
+- Public feed
+- Pagination
+- Newest-first ordering
+- Post retrieval
+- Pagination metadata
+
+Status:
+COMPLETE
+
+## Single Post
+
+Implemented:
+
+GET /api/posts/:id
+
+Supports:
+
+- Public access
+- MongoDB ObjectId validation
+- Post lookup
+- Author population
+- 400 for invalid ID
+- 404 for missing post
+
+Status:
+COMPLETE
+
+## Edit Own Post
+
+Implemented:
+
+PATCH /api/posts/:id
+
+Supports:
+
+- Authentication
+- ObjectId validation
+- Partial updates
+- Request validation
+- Ownership authorization
+- 403 when another user attempts editing
+- 404 for missing post
+
+Status:
+COMPLETE
+
+## Delete Own Post
+
+Implemented:
+
+DELETE /api/posts/:id
+
+Supports:
+
+- Authentication
+- ObjectId validation
+- Ownership authorization
+- 403 for unauthorized owner mismatch
+- 404 for missing post
+- Successful deletion response
+
+Status:
+COMPLETE
+
+## Posts Verification
+
+Verified:
+
+- TypeScript type-check
+- Backend production build
+- Development server
+- Successful API requests
+- Authentication protection
+- Validation/error cases
+- Ownership authorization
+
+Git checkpoint:
+
+- Posts System committed
+- Changes pushed to GitHub
+
+Milestone 6 is CLOSED.
+
+---
+
+# 17. CURRENT ACTIVE MILESTONE
+
+## Milestone 7 — Profile System
+
+Status:
+NEXT
+
+The next implementation phase is the Profile System.
+
+Planned API direction:
+
+GET /api/profile/:username
+PATCH /api/profile
+
+Expected scope:
+
+- View public profile
+- Username
+- Name
+- Bio
+- Avatar
+- Relevant profile information
+- My posts
+- Edit own profile
+- Authentication/ownership protection
+- Validation
+- Error handling
+
+Do not add social/follow functionality unless it is explicitly part of the locked V1 implementation plan.
+
+---
+
+# 18. UPCOMING MILESTONES
+
+After Profile System:
+
+## Milestone 8
+
+Bookmarks System
+
+Expected:
+
+- Bookmark post
+- Remove bookmark
+- View bookmarks
+- Prevent duplicate bookmarks
+- Proper ownership/authentication
+
+## Milestone 9
+
+Search + Category Filtering
+
+Expected:
+
+- Search posts
+- Category filtering
+- Query validation
+- Pagination compatibility
+- Reasonable database querying/indexing
+
+## Milestone 10
+
+Frontend App Shell
+
+Expected:
+
+- Global layout
+- Navigation
+- Theme system
+- Responsive shell
+- Reusable UI foundation
+
+## Milestone 11
+
+Frontend Authentication
+
+Expected:
+
+- Register UI
+- Login UI
+- Logout
+- Auth state
+- Protected frontend routes
+- Form validation
+- Loading/error/success UX
+
+## Milestone 12
+
+Feed + Post UI
+
+Expected:
+
+- Feed
+- Post cards
+- Create post
+- Markdown editor/rendering
+- Code highlighting
+- Post detail
+- Edit/delete UX
+- Loading/empty/error states
+
+## Milestone 13
+
+Profile UI
+
+Expected:
+
+- Public profile
+- Profile editing
+- My posts
+- Responsive states
+
+## Milestone 14
+
+Search + Bookmarks UI
+
+Expected:
+
+- Search
+- Category filters
+- Bookmark actions
+- Bookmarks page
+- Loading/empty/error states
+
+## Milestone 15
+
+Settings + Themes
+
+Expected:
+
+- Account settings
+- Dark/light theme
+- Accessible theme controls
+- Responsive settings UI
+
+## Milestone 16
+
+Full Frontend ↔ Backend Integration
+
+Expected:
+
+- End-to-end API integration
+- Authenticated flows
+- Error handling
+- Consistent API client behavior
+- Production-ready state handling
+
+## Milestone 17
+
+Testing + Security
+
+Expected:
+
+- API testing
+- Validation testing
+- Authorization testing
+- Authentication testing
+- Security review
+- Edge cases
+
+## Milestone 18
+
+Performance + Product Polish
+
+Expected:
+
+- Performance review
+- Query optimization
+- Loading/skeleton polish
+- Accessibility review
+- Responsive review
+- UX consistency
+
+## Milestone 19
+
+Deployment
+
+Expected:
+
+- Backend deployment to Render
+- Frontend deployment to Vercel
+- Production environment variables
+- CORS configuration
+- MongoDB production configuration
+- Cloudinary configuration
+- Production verification
+
+## Milestone 20
+
+README + Portfolio Polish
+
+Expected:
+
+- Professional README
+- Architecture documentation
+- Feature documentation
+- Setup instructions
+- Deployment information
+- Screenshots/demo
+- Portfolio presentation
+- Final project review
+
+---
+
+# 19. GIT RULES
 
 Repository:
 
 DevPostify-Nova
 
-Fresh Git repository.
+This is a fresh repository.
 
-Old DevPostify Git history is not reused.
+Do not reuse old DevPostify Git history or remote.
 
-Structure:
+Before important checkpoints verify:
 
-```text
-DevPostify-Nova/
-├── frontend/
-├── backend/
-├── README.md
-├── .gitignore
-└── DEVPOSTIFY_NOVA_CONTEXT.md
-```
+git status
+git remote -v
+
+Also verify:
+
+- type-check
+- build
+- tests where applicable
+
+Use meaningful milestone commits.
+
+Completed major checkpoint:
+
+Milestone 6 — Posts System pushed successfully.
+
+---
+
+# 20. CONTINUITY RULES
+
+This file is the project source of truth.
+
+At meaningful milestones update:
+
+- Locked decisions
+- Current milestone
+- Completed work
+- Current task
+- Next task
+- Important technical decisions
+- Known issues
+
+Do NOT store:
+
+- Temporary debugging conversations
+- Repeated test credentials
+- Minor command history
+- Resolved one-off errors
+- Unnecessary implementation chatter
+
+If a locked decision changes, explicitly document the change.
+
+Never silently change locked product decisions.
+
+---
+
+# 21. CURRENT SOURCE-OF-TRUTH SNAPSHOT
+
+Current state:
+
+Milestones 1–5:
+COMPLETE
+
+Milestone 6 — Posts:
+COMPLETE + PUSHED
+
+Current active milestone:
+Milestone 7 — Profile System
+
+Current immediate objective:
+
+Build and verify the Profile API before moving to Bookmarks.
+
+Project philosophy:
+
+Learn → Practice → Build → Verify → Ship
+
+The goal is a production-quality flagship portfolio project, not merely a tutorial project.
