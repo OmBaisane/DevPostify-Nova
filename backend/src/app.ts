@@ -2,8 +2,11 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { env } from "./config/env";
+
 import healthRoutes from "./routes/health.routes";
 import authRoutes from "./routes/auth.routes";
+import postRoutes from "./routes/post.routes";
+
 import { notFound } from "./middleware/notFound";
 import { errorHandler } from "./middleware/errorHandler";
 
@@ -29,6 +32,7 @@ app.get("/", (_req, res) => {
 
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
