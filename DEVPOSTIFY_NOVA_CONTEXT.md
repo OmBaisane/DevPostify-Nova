@@ -890,9 +890,18 @@ Status: COMPLETE
 - Auth middleware convention: `requireAuth`
 - Type-check and build verified
 
+### Milestone 9: Discovery (Search & Category Filtering) (COMPLETE)
+
+- Added weighted full-text search index on `Post` schema (`title: 10`, `tags: 5`, `content: 1`)
+- Upgraded `GET /api/posts` to handle:
+  - Full-text search queries sorted by `$meta: "textScore"` relevance
+  - Category-based lowercase filtering
+  - Sanitized pagination parameters
+- Verification: Type-check and production build passed
+
 ### Next Milestone
 
-Current Task: Milestone 9 — Discovery / Search & Filtering
+Current Task: Milestone 10 — Frontend Foundation & Design System Setup
 
 Current immediate objective:
 

@@ -47,8 +47,15 @@ const postSchema = new Schema(
   },
 );
 
+// Query indexes
 postSchema.index({ createdAt: -1 });
 postSchema.index({ category: 1, createdAt: -1 });
+
+// Full-text search index with field weighting
+postSchema.index(
+  { title: "text", content: "text", tags: "text" },
+  { weights: { title: 10, tags: 5, content: 1 }, name: "PostTextSearchIndex" },
+);
 
 export type Post = InferSchemaType<typeof postSchema>;
 
