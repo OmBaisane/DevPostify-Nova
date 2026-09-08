@@ -7,6 +7,7 @@ import healthRoutes from "./routes/health.routes";
 import authRoutes from "./routes/auth.routes";
 import postRoutes from "./routes/post.routes";
 import profileRoutes from "./routes/profile.routes";
+import bookmarkRoutes from "./routes/bookmark.routes";
 
 import { notFound } from "./middleware/notFound";
 import { errorHandler } from "./middleware/errorHandler";
@@ -35,6 +36,7 @@ app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/bookmarks", bookmarkRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -858,14 +858,41 @@ Never silently change locked product decisions.
 
 Current state:
 
-Milestones 1–5:
+Milestones 1–6:
 COMPLETE
 
-Milestone 6 — Posts:
-COMPLETE + PUSHED
+## Current Milestone
 
-Current active milestone:
 Milestone 7 — Profile System
+
+Status: COMPLETE
+
+### Completed
+
+- Public profile API
+- User posts included in profile response
+- Edit own profile API
+- Profile validation
+- Authentication protection
+- Profile ownership protection
+- Username/email cannot be changed through profile endpoint
+- Password excluded from profile responses
+- Profile API error handling
+- API testing completed
+- Type-check passed
+- Production build passed
+
+### Milestone 8: Bookmarks System (COMPLETE)
+
+- `POST /api/bookmarks/:postId` — Add post to bookmarks (prevents duplicate via code & compound index)
+- `DELETE /api/bookmarks/:postId` — Remove bookmark
+- `GET /api/bookmarks` — List user's bookmarks with populated post and author info
+- Auth middleware convention: `requireAuth`
+- Type-check and build verified
+
+### Next Milestone
+
+Current Task: Milestone 9 — Discovery / Search & Filtering
 
 Current immediate objective:
 
