@@ -335,29 +335,36 @@ Credentials-enabled type-safe API client (frontend/src/lib/api.ts).
 
 Production build verified.
 
-11. CURRENT POSITION
-Current State
-Milestones 1–10 are COMPLETE, VERIFIED, and LOCKED.
+### Milestone 11 — Frontend Authentication (COMPLETE)
+- Configured centralized `AuthContext` with session hydration via `/api/auth/me`
 
-Next Milestone
-Milestone 11 — Frontend Authentication
+- Implemented `login`, `register`, and `logout` operations with auto-redirection
+
+- Built responsive `/login` and `/register` pages with form validation, error states, and locked design tokens (16px cards, 12px inputs/buttons)
+
+- Built `ProtectedRoute` client component for guarding authenticated routes
+
+- Production build verified with zero errors
+
+### Current State
+
+Milestones 1–11 are COMPLETE, VERIFIED, and LOCKED.
+
+### Next Milestone
+
+**Milestone 12 — Feed & Post UI**
 
 Expected Scope:
 
-Auth context / state management (AuthProvider)
+- Top Navigation / Header with brand logo and auth actions
 
-Register page (/register)
+- Feed view (`/`) with real posts from `GET /api/posts`
 
-Login page (/login)
+- Post Card component (author avatar, title, tags, category, reading time)
 
-Form validation & feedback (Zod / React state)
-
-Route protection (Redirect if unauthenticated / redirect authenticated away from login)
-
-Verification & Git Checkpoint
+- Loading skeleton states and empty states
 
 12. REMAINING ROADMAP (V1)
-Milestone 11: Frontend Authentication (State, Forms, Route Protection)
 
 Milestone 12: Feed & Post UI (Feed, Post Cards, Markdown Reader/Editor, Code Highlighting)
 
