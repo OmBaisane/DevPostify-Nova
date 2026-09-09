@@ -6,7 +6,6 @@ import {
   comparePassword,
 } from "../utils/auth.js";
 import { sendSuccess } from "../utils/apiResponse.js";
-import { success } from "zod";
 
 const COOKIE_NAME = "devpostify_token";
 
@@ -36,10 +35,10 @@ export const register = async (req: Request, res: Response) => {
     });
   }
 
-  if (normalizedPasswordLength(password)) {
+  if (password.length < 6) {
     return res.status(400).json({
       success: false,
-      message: "Password must be at least 8 characters",
+      message: "Password must be at least 6 characters",
     });
   }
 
@@ -83,43 +82,49 @@ export const register = async (req: Request, res: Response) => {
 
   return sendSuccess(res, 201, "Account created successfully", {
     user: {
+      _id: user._id,
       id: user._id,
       username: user.username,
       email: user.email,
       name: user.name,
       bio: user.bio,
       avatar: user.avatar,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     },
   });
 };
 
 export const login = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, username, emailOrUsername, password } = req.body;
 
-  if (typeof email !== "string" || typeof password !== "string") {
+  const identifier = (emailOrUsername || email || username || "") as string;
+
+  if (typeof identifier !== "string" || typeof password !== "string") {
     return res.status(400).json({
       success: false,
-      message: "Email and password are required",
+      message: "Email/username and password are required",
     });
   }
 
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedIdentifier = identifier.trim().toLowerCase();
 
-  if (!normalizedEmail || !password) {
+  if (!normalizedIdentifier || !password) {
     return res.status(400).json({
       success: false,
-      message: "Email and password are required",
+      message: "Email or username and password are required",
     });
   }
 
+  // Find user by either email or username
   const user = await UserModel.findOne({
-    email: normalizedEmail,
+    $or: [{ email: normalizedIdentifier }, { username: normalizedIdentifier }],
   }).select("+password");
 
   if (!user) {
     return res.status(401).json({
       success: false,
-      message: "Invalid email or password",
+      message: "Invalid email/username or password",
     });
   }
 
@@ -128,7 +133,7 @@ export const login = async (req: Request, res: Response) => {
   if (!isPasswordValid) {
     return res.status(401).json({
       success: false,
-      message: "Invalid email or password",
+      message: "Invalid email/username or password",
     });
   }
 
@@ -143,18 +148,17 @@ export const login = async (req: Request, res: Response) => {
 
   return sendSuccess(res, 200, "Login successful", {
     user: {
+      _id: user._id,
       id: user._id,
       username: user.username,
       email: user.email,
       name: user.name,
       bio: user.bio,
       avatar: user.avatar,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     },
   });
-};
-
-const normalizedPasswordLength = (password: string): boolean => {
-  return password.length < 8;
 };
 
 export const getMe = async (req: Request, res: Response) => {
@@ -176,12 +180,15 @@ export const getMe = async (req: Request, res: Response) => {
 
   return sendSuccess(res, 200, "Current user fetched successfully", {
     user: {
+      _id: user._id,
       id: user._id,
       username: user.username,
       email: user.email,
       name: user.name,
       bio: user.bio,
       avatar: user.avatar,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
     },
   });
 };

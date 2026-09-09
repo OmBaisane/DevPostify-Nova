@@ -346,27 +346,41 @@ Production build verified.
 
 - Production build verified with zero errors
 
+### Milestone 12 — Feed & Post UI (COMPLETE)
+
+- Implemented global responsive `Navbar` with brand logo and dynamic auth actions (Sign In / Register vs Write Post / Bookmarks / User Badge / Logout).
+
+- Built `PostCard` component with reading-time calculation, category tags, author metadata, and hover interactions.
+
+- Built `PostSkeleton` shimmer loader and `EmptyState` view for zero-state handling.
+
+- Built feed page (`/`) integrated with `GET /api/posts` supporting real-time category filtering.
+
+- Implemented `/create` page wrapped in `ProtectedRoute` with title, category selector, comma-separated tags, and a live Write/Preview markdown editor.
+
+- Implemented `/posts/[id]` dynamic post detail view with author headers, read time, formatted body, and author-only post deletion (`DELETE /api/posts/:id`).
+
+- Verified full roundtrip: create post -> feed rendering -> view post -> delete post.
+
 ### Current State
 
-Milestones 1–11 are COMPLETE, VERIFIED, and LOCKED.
+Milestones 1–12 are COMPLETE, VERIFIED, and LOCKED.
 
 ### Next Milestone
 
-**Milestone 12 — Feed & Post UI**
+**Milestone 13 — Profile UI**
 
 Expected Scope:
 
-- Top Navigation / Header with brand logo and auth actions
+- Public profile page (`/profile/[username]`) fetching user details (`GET /api/profile/:username`)
 
-- Feed view (`/`) with real posts from `GET /api/posts`
+- Display author bio, join date, avatar initial, and tabbed list of posts created by this user
 
-- Post Card component (author avatar, title, tags, category, reading time)
+- Edit Profile modal or settings page (`PATCH /api/profile`) for updating name and bio
 
-- Loading skeleton states and empty states
+- Form validation and ownership protection
 
 12. REMAINING ROADMAP (V1)
-
-Milestone 12: Feed & Post UI (Feed, Post Cards, Markdown Reader/Editor, Code Highlighting)
 
 Milestone 13: Profile UI (Public Profile & Edit Profile)
 
