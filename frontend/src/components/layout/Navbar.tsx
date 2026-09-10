@@ -4,7 +4,13 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import { PenSquare, Bookmark, LogOut, User as UserIcon } from "lucide-react";
+import {
+  PenSquare,
+  Bookmark,
+  LogOut,
+  User as UserIcon,
+  Search,
+} from "lucide-react";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -28,6 +34,15 @@ export default function Navbar() {
 
         {/* Actions */}
         <div className="flex items-center gap-3">
+          {/* Discovery Search Link */}
+          <Link
+            href="/search"
+            className="inline-flex items-center justify-center h-9 w-9 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white hover:border-slate-700 transition"
+            title="Search Insights"
+          >
+            <Search className="h-4 w-4" />
+          </Link>
+
           {user ? (
             <>
               <Link

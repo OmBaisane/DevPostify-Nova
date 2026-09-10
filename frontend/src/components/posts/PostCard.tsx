@@ -1,17 +1,31 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Post } from "@/types/post";
-import { Clock, Tag } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/api";
+import { Clock, Tag, Bookmark } from "lucide-react";
 
 interface PostCardProps {
   post: Post;
+  initialBookmarked?: boolean;
+  onBookmarkRemoved?: (postId: string) => void;
 }
 
-export default function PostCard({ post }: PostCardProps) {
-  // Rough reading time calculation (avg 200 words per minute)
-  const wordCount = post.content.trim().split(/\s+/).length;
+export default function PostCard({
+  post,
+  initialBookmarked = false,
+  onBookmarkRemoved,
+}: PostCardProps) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
+  const [isToggling, setIsToggling] = useState(false);
+
+  // Approximate reading time
+  const wordCount = post.content?.trim().split(/\s+/).length || 0;
   const readTime = Math.max(1, Math.ceil(wordCount / 200));
 
   const formattedDate = new Date(post.createdAt).toLocaleDateString("en-US", {
@@ -20,9 +34,41 @@ export default function PostCard({ post }: PostCardProps) {
     year: "numeric",
   });
 
+  const handleBookmarkToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+
+    if (isToggling) return;
+
+    const previousState = isBookmarked;
+    setIsBookmarked(!previousState);
+    setIsToggling(true);
+
+    try {
+      if (previousState) {
+        await api.delete(`/bookmarks/${post._id}`);
+        if (onBookmarkRemoved) {
+          onBookmarkRemoved(post._id);
+        }
+      } else {
+        await api.post(`/bookmarks/${post._id}`);
+      }
+    } catch {
+      // Revert if API fails
+      setIsBookmarked(previousState);
+    } finally {
+      setIsToggling(false);
+    }
+  };
+
   return (
     <article className="card-surface p-5 sm:p-6 transition-all duration-200 hover:border-slate-700/80 hover:shadow-lg hover:shadow-blue-500/5">
-      {/* Author Header */}
+      {/* Author Header & Bookmark Action */}
       <div className="flex items-center justify-between mb-4">
         <Link
           href={`/profile/${post.author?.username}`}
@@ -41,13 +87,31 @@ export default function PostCard({ post }: PostCardProps) {
           </div>
         </Link>
 
-        <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
-          <time dateTime={post.createdAt}>{formattedDate}</time>
-          <span>•</span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-3 w-3" />
-            {readTime} min read
-          </span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
+            <time dateTime={post.createdAt}>{formattedDate}</time>
+            <span>•</span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {readTime} min read
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleBookmarkToggle}
+            disabled={isToggling}
+            aria-label={isBookmarked ? "Remove bookmark" : "Save bookmark"}
+            className={`p-1.5 rounded-lg border transition ${
+              isBookmarked
+                ? "border-blue-500/50 bg-blue-500/10 text-blue-400"
+                : "border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+            }`}
+          >
+            <Bookmark
+              className={`h-3.5 w-3.5 ${isBookmarked ? "fill-blue-400" : ""}`}
+            />
+          </button>
         </div>
       </div>
 
@@ -58,7 +122,7 @@ export default function PostCard({ post }: PostCardProps) {
             {post.title}
           </h2>
           <p className="text-xs leading-relaxed text-slate-400 line-clamp-3">
-            {post.content.replace(/[#*`_~\[\]]/g, "")}
+            {post.content?.replace(/[#*`_~\[\]]/g, "")}
           </p>
         </Link>
       </div>
@@ -66,12 +130,10 @@ export default function PostCard({ post }: PostCardProps) {
       {/* Category & Tags Footer */}
       <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-800/60 text-xs">
         <div className="flex flex-wrap items-center gap-2">
-          {/* Category Pill */}
           <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-[11px] font-medium text-blue-400 border border-blue-500/20">
             {post.category}
           </span>
 
-          {/* Tags */}
           {post.tags?.slice(0, 3).map((tag) => (
             <span
               key={tag}

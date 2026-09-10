@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { api, ApiError } from "@/lib/api";
 import { Post, PostsResponseData } from "@/types/post";
+import { useAuth } from "@/context/AuthContext";
 import PostCard from "@/components/posts/PostCard";
 import PostSkeleton from "@/components/posts/PostSkeleton";
 import EmptyState from "@/components/ui/EmptyState";
@@ -18,13 +19,19 @@ const CATEGORIES = [
   { label: "AI & ML", value: "ai" },
 ];
 
+interface BookmarkItem {
+  post: { _id: string };
+}
+
 export default function FeedPage() {
+  const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPostsAndBookmarks = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
@@ -38,9 +45,28 @@ export default function FeedPage() {
         params.category = selectedCategory;
       }
 
-      const response = await api.get<PostsResponseData>("/posts", { params });
-      if (response.data?.posts) {
-        setPosts(response.data.posts);
+      // Fetch feed posts and (if logged in) current bookmarks in parallel
+      const postsPromise = api.get<PostsResponseData>("/posts", { params });
+      const bookmarksPromise = user
+        ? api.get<{ bookmarks: BookmarkItem[] }>("/bookmarks")
+        : Promise.resolve({ data: { bookmarks: [] } });
+
+      const [postsRes, bookmarksRes] = await Promise.all([
+        postsPromise,
+        bookmarksPromise,
+      ]);
+
+      if (postsRes.data?.posts) {
+        setPosts(postsRes.data.posts);
+      }
+
+      if (bookmarksRes.data?.bookmarks) {
+        const idSet = new Set(
+          bookmarksRes.data.bookmarks
+            .filter((b) => b.post && b.post._id)
+            .map((b) => b.post._id),
+        );
+        setBookmarkedIds(idSet);
       }
     } catch (err) {
       if (err instanceof ApiError) {
@@ -51,11 +77,11 @@ export default function FeedPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, user]);
 
   useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
+    fetchPostsAndBookmarks();
+  }, [fetchPostsAndBookmarks]);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
@@ -119,7 +145,13 @@ export default function FeedPage() {
             <PostSkeleton />
           </>
         ) : posts.length > 0 ? (
-          posts.map((post) => <PostCard key={post._id} post={post} />)
+          posts.map((post) => (
+            <PostCard
+              key={post._id}
+              post={post}
+              initialBookmarked={bookmarkedIds.has(post._id)}
+            />
+          ))
         ) : (
           <EmptyState
             title="No posts found"

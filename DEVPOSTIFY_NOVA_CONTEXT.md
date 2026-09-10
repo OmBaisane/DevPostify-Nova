@@ -374,25 +374,39 @@ Production build verified.
 
 - Empty states and error fallbacks cleanly styled to dark-mode design system.
 
+### Milestone 14 — Bookmarks UI & Discovery Search (COMPLETE)
+
+- Mounted `/api/search` route on backend with regex matching across title, content, and tags.
+
+- Made bookmark controllers (`POST /api/bookmarks/:postId` & `DELETE /api/bookmarks/:postId`) idempotent to prevent 409 conflict exceptions on desynced toggles.
+
+- Built `/bookmarks` page wrapped in `ProtectedRoute` with live removal callback (`onBookmarkRemoved`).
+
+- Built `/search` discovery page wrapped in `<Suspense>` to ensure Next.js Turbopack prerender compliance.
+
+- Added Search discovery icon link to global `Navbar`.
+
+- Hydrated initial bookmark state on home feed (`/`) via parallel `Promise.all` queries.
+
 ### Current State
 
-Milestones 1–13 are COMPLETE, VERIFIED, and LOCKED.
+Milestones 1–14 are COMPLETE, VERIFIED, and LOCKED.
 
 ### Next Milestone
 
-**Milestone 14 — Bookmarks UI & Discovery Search**
+**Milestone 15 — Production Polish, Optimization & Portfolio Presentation**
 
 Expected Scope:
 
-- Bookmark toggle button on `PostCard` and Single Post view (`POST /api/bookmarks/:postId`, `DELETE /api/bookmarks/:postId`).
+- Edge-case validation and error boundary checks.
 
-- Bookmarks view page (`/bookmarks`) rendering user's saved engineering insights.
+- Metadata & OpenGraph tags for social sharing.
 
-- Top-level or discovery search input hitting `GET /api/search` with keyword & tag filtering.
+- Code cleanup, console log stripping, and final production builds.
+
+- Portfolio README with architecture diagrams and API specs.
 
 12. REMAINING ROADMAP (V1)
-
-Milestone 14: Search & Bookmarks UI
 
 Milestone 15: Settings & Theme Controls
 

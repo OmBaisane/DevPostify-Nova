@@ -1,16 +1,17 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { env } from "./config/env";
+import { env } from "./config/env.js";
 
-import healthRoutes from "./routes/health.routes";
-import authRoutes from "./routes/auth.routes";
-import postRoutes from "./routes/post.routes";
-import profileRoutes from "./routes/profile.routes";
-import bookmarkRoutes from "./routes/bookmark.routes";
+import healthRoutes from "./routes/health.routes.js";
+import authRoutes from "./routes/auth.routes.js";
+import postRoutes from "./routes/post.routes.js";
+import profileRoutes from "./routes/profile.routes.js";
+import bookmarkRoutes from "./routes/bookmark.routes.js";
+import searchRoutes from "./routes/search.routes.js";
 
-import { notFound } from "./middleware/notFound";
-import { errorHandler } from "./middleware/errorHandler";
+import { notFound } from "./middleware/notFound.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/bookmarks", bookmarkRoutes);
+app.use("/api/search", searchRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

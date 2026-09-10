@@ -1,11 +1,11 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
-import { BookmarkModel } from "../models/Bookmark";
-import { PostModel } from "../models/Post";
-import { asyncHandler } from "../utils/asyncHandler";
-import { sendSuccess } from "../utils/apiResponse";
+import { BookmarkModel } from "../models/Bookmark.js";
+import { PostModel } from "../models/Post.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { sendSuccess } from "../utils/apiResponse.js";
 
-// @desc    Add post to bookmarks
+// @desc    Add post to bookmarks (Idempotent)
 // @route   POST /api/bookmarks/:postId
 // @access  Private
 export const addBookmark = asyncHandler(async (req: Request, res: Response) => {
@@ -40,10 +40,10 @@ export const addBookmark = asyncHandler(async (req: Request, res: Response) => {
     post: postId,
   });
 
+  // Agar already bookmarked hai toh 409 error throw karne ki jagah existing bookmark hi return karo
   if (existingBookmark) {
-    return res.status(409).json({
-      success: false,
-      message: "Post is already bookmarked",
+    return sendSuccess(res, 200, "Post already bookmarked", {
+      bookmark: existingBookmark,
     });
   }
 
@@ -55,7 +55,7 @@ export const addBookmark = asyncHandler(async (req: Request, res: Response) => {
   return sendSuccess(res, 201, "Post bookmarked successfully", { bookmark });
 });
 
-// @desc    Remove post from bookmarks
+// @desc    Remove post from bookmarks (Idempotent)
 // @route   DELETE /api/bookmarks/:postId
 // @access  Private
 export const removeBookmark = asyncHandler(
@@ -81,17 +81,10 @@ export const removeBookmark = asyncHandler(
       });
     }
 
-    const bookmark = await BookmarkModel.findOneAndDelete({
+    await BookmarkModel.findOneAndDelete({
       user: userId,
       post: postId,
     });
-
-    if (!bookmark) {
-      return res.status(404).json({
-        success: false,
-        message: "Bookmark not found",
-      });
-    }
 
     return sendSuccess(res, 200, "Bookmark removed successfully");
   },
