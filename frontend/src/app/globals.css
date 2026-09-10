@@ -18,10 +18,24 @@
     --radius-card: 16px;
     --radius-btn: 12px;
     --radius-input: 12px;
+
+    /* Base dark palette (default) */
+    --bg-base: #020617; /* slate-950 */
+    --text-base: #f8fafc; /* slate-50 */
+  }
+
+  html.light {
+    --bg-base: #f8fafc; /* slate-50 */
+    --text-base: #0f172a; /* slate-900 */
   }
 
   body {
+    background-color: var(--bg-base);
+    color: var(--text-base);
     font-family: var(--font-sans);
+    transition:
+      background-color 150ms ease,
+      color 150ms ease;
   }
 
   h1,
@@ -41,12 +55,16 @@
   }
 }
 
-/* Custom utility classes for locked geometry and brand styling */
+/* Custom utility classes for locked geometry, brand styling & light/dark adaptation */
 @utility card-surface {
   background-color: rgb(15 23 42 / 0.7);
   backdrop-filter: blur(12px);
   border: 1px solid rgb(30 41 59 / 0.8);
   border-radius: var(--radius-card);
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
 
 @utility btn-primary {
@@ -60,11 +78,23 @@
   transition: all 150ms ease-in-out;
 }
 
+.btn-primary:hover {
+  opacity: 0.95;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
 @utility input-surface {
   border-radius: var(--radius-input);
   background-color: rgb(15 23 42 / 0.6);
-  border: 1px solid rgb(51 65 85);
-  color: rgb(241 245 249);
+  border: 1px solid rgb(51 65 85); /* slate-700 */
+  color: rgb(241 245 249); /* slate-100 */
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
 }
 
 @utility brand-gradient-text {

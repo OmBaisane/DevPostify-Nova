@@ -1,35 +1,35 @@
 import type { Metadata } from "next";
-import { Inter, Poppins, JetBrains_Mono } from "next/font/google";
+import { Poppins, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import Navbar from "@/components/layout/Navbar";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
-
 const poppins = Poppins({
-  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
+  weight: ["500", "600", "700"],
   variable: "--font-poppins",
   display: "swap",
 });
 
-const jetbrainsMono = JetBrains_Mono({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-jetbrains-mono",
+  weight: ["400", "500", "600"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "DevPostify Nova — Where Developers Build Their Identity",
+  title: "DevPostify — Where Developers Build Their Identity",
   description:
-    "Developer-first professional social platform to share technical knowledge, showcase projects, and build identity.",
-  icons: {
-    icon: "/brand/devpostify-mark.svg",
-  },
+    "Developer-first professional platform to share technical architecture, engineering learnings, and insights.",
 };
 
 export default function RootLayout({
@@ -40,13 +40,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${inter.variable} ${poppins.variable} ${jetbrainsMono.variable}`}
+      className={`dark ${poppins.variable} ${inter.variable} ${jetbrains.variable}`}
     >
-      <body className="min-h-screen bg-slate-950 font-sans text-slate-100 antialiased selection:bg-blue-600 selection:text-white flex flex-col">
-        <AuthProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-        </AuthProvider>
+      <body className="min-h-screen bg-slate-950 font-sans text-slate-100 antialiased selection:bg-blue-600/30 selection:text-blue-200">
+        <ThemeProvider>
+          <AuthProvider>
+            <Navbar />
+            <main className="min-h-[calc(100vh-4rem)]">{children}</main>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

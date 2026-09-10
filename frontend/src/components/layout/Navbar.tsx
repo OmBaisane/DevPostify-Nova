@@ -10,6 +10,7 @@ import {
   LogOut,
   User as UserIcon,
   Search,
+  Settings,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -59,6 +60,14 @@ export default function Navbar() {
                 title="Saved Bookmarks"
               >
                 <Bookmark className="h-4 w-4" />
+              </Link>
+
+              <Link
+                href="/settings"
+                className="inline-flex items-center justify-center h-9 w-9 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white hover:border-slate-700 transition"
+                title="Account Settings"
+              >
+                <Settings className="h-4 w-4" />
               </Link>
 
               <Link
