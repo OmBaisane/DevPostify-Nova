@@ -110,9 +110,9 @@ PLAN → EXECUTE → VERIFY → TEST → COMMIT → NEXT
 
 ## Settings
 
-- Dark mode by default
-- Light mode
-- Account settings
+- Developer dark mode locked default
+- Account credentials overview
+- Session termination
 
 ## UX
 
@@ -121,7 +121,6 @@ PLAN → EXECUTE → VERIFY → TEST → COMMIT → NEXT
 - Empty states
 - Error states
 - Form validation
-- Toast/success feedback
 - Accessible interactions
 
 ---
@@ -147,14 +146,13 @@ Do not silently expand the V1 scope.
 
 ## Colors
 
-Primary: #2563EB
-Accent: #7C3AED
-Gradient: Blue → Violet
+- Primary: #2563EB
+- Accent: #7C3AED
+- Gradient: Blue → Violet
 
 ## Theme
 
-- Dark mode is the default.
-- Light mode is supported.
+- Developer Dark Mode is the locked default.
 
 ## Typography
 
@@ -164,7 +162,7 @@ Gradient: Blue → Violet
 
 ## Spacing
 
-8px spacing system.
+- 8px spacing system.
 
 ## Radius
 
@@ -252,7 +250,7 @@ Auth Middleware: requireAuth (backend/src/middleware/auth.ts)
 
 Request Typing: req.userId attached to Express Request
 
-Model Models: Named exports (UserModel, PostModel, BookmarkModel)
+Models: Named exports (UserModel, PostModel, BookmarkModel)
 
 Response Helpers: sendSuccess (backend/src/utils/apiResponse.ts)
 
@@ -286,11 +284,11 @@ POST /api/bookmarks/:postId
 
 DELETE /api/bookmarks/:postId
 
-10. COMPLETED MILESTONES (1–10)
-Milestone 1 — Project Setup (COMPLETE)
-DevPostify Nova repository initialized.
+GET /api/search
 
-Frontend & Backend setups verified.
+10. COMPLETED MILESTONES (1–15)
+Milestone 1 — Project Setup (COMPLETE)
+DevPostify Nova repository initialized. Frontend & Backend setups verified.
 
 Milestone 2 — Design System Foundation (COMPLETE)
 Design tokens, dark-first theme direction, and typography setup.
@@ -308,108 +306,52 @@ Milestone 6 — Posts System (COMPLETE)
 Full CRUD for posts, ownership validation, author population, pagination.
 
 Milestone 7 — Profile System (COMPLETE)
-Public profile lookup by username with posts (GET /api/profile/:username).
-
-Edit own profile (PATCH /api/profile) with validation. Username and email modification locked.
+Public profile lookup by username with posts (GET /api/profile/:username). Edit own profile (PATCH /api/profile) with validation. Username and email modification locked.
 
 Milestone 8 — Bookmarks System (COMPLETE)
-POST /api/bookmarks/:postId — Add bookmark with duplicate protection via compound unique index { user: 1, post: 1 }.
-
-DELETE /api/bookmarks/:postId — Remove bookmark.
-
-GET /api/bookmarks — List user's bookmarks populated with post and author data.
+POST /api/bookmarks/:postId with duplicate protection, DELETE /api/bookmarks/:postId, and GET /api/bookmarks.
 
 Milestone 9 — Discovery: Search & Filtering (COMPLETE)
-MongoDB full-text search index (title: 10, tags: 5, content: 1).
-
-GET /api/posts integrated with relevance sorting ($meta: "textScore"), category filters, and pagination.
-
-Post feed route wired correctly in router.
+MongoDB full-text search index, category filters, and pagination.
 
 Milestone 10 — Frontend Foundation & Design System Setup (COMPLETE)
-Next.js App Router initialized with Google Fonts (Poppins, Inter, JetBrains Mono).
+Next.js App Router initialized with Google Fonts (Poppins, Inter, JetBrains Mono). Locked design tokens and credentials-enabled type-safe API client.
 
-Dark mode default with brand colors (#2563EB, #7C3AED) and locked radiuses (16px cards, 12px buttons/inputs).
+Milestone 11 — Frontend Authentication (COMPLETE)
+Centralized AuthContext, session hydration, /login & /register views, and ProtectedRoute wrapper.
 
-Credentials-enabled type-safe API client (frontend/src/lib/api.ts).
+Milestone 12 — Feed & Post UI (COMPLETE)
+Global responsive Navbar, PostCard with reading-time, shimmer skeletons, category filters, Markdown write/preview editor (/create), and dynamic post detail view (/posts/[id]).
 
-Production build verified.
+Milestone 13 — Profile UI & Edit Profile (COMPLETE)
+Dynamic route /profile/[username], developer hero card, post metrics, and EditProfileModal connected to PATCH /api/profile.
 
-### Milestone 11 — Frontend Authentication (COMPLETE)
-- Configured centralized `AuthContext` with session hydration via `/api/auth/me`
+Milestone 14 — Bookmarks UI & Discovery Search (COMPLETE)
+Mounted /api/search with keyword regex matching, idempotent bookmark toggling, /bookmarks page, and Suspense-wrapped /search discovery page.
 
-- Implemented `login`, `register`, and `logout` operations with auto-redirection
+Milestone 15 — Post Actions & Settings (COMPLETE)
+Implemented /posts/[id]/edit workflow with author verification and PATCH /api/posts/:id integration.
 
-- Built responsive `/login` and `/register` pages with form validation, error states, and locked design tokens (16px cards, 12px inputs/buttons)
+Built protected /settings view with registered credentials summary and authenticated session termination.
 
-- Built `ProtectedRoute` client component for guarding authenticated routes
+Locked UI permanently to Developer Dark Mode to guarantee consistent typography contrast and zero visual regressions.
 
-- Production build verified with zero errors
+Added Settings shortcut to global Navbar.
 
-### Milestone 12 — Feed & Post UI (COMPLETE)
+11. CURRENT POSITION
+Current State
+Milestones 1–15 are COMPLETE, VERIFIED, and LOCKED.
 
-- Implemented global responsive `Navbar` with brand logo and dynamic auth actions (Sign In / Register vs Write Post / Bookmarks / User Badge / Logout).
-
-- Built `PostCard` component with reading-time calculation, category tags, author metadata, and hover interactions.
-
-- Built `PostSkeleton` shimmer loader and `EmptyState` view for zero-state handling.
-
-- Built feed page (`/`) integrated with `GET /api/posts` supporting real-time category filtering.
-
-- Implemented `/create` page wrapped in `ProtectedRoute` with title, category selector, comma-separated tags, and a live Write/Preview markdown editor.
-
-- Implemented `/posts/[id]` dynamic post detail view with author headers, read time, formatted body, and author-only post deletion (`DELETE /api/posts/:id`).
-
-- Verified full roundtrip: create post -> feed rendering -> view post -> delete post.
-
-### Milestone 13 — Profile UI & Edit Profile (COMPLETE)
-
-- Implemented `/profile/[username]` dynamic route fetching developer info and authored posts in parallel (`Promise.all`).
-
-- Built developer-first profile hero card: dynamic initial badge, joined date, bio presentation, and post count metrics.
-
-- Added strict ownership validation (`isOwner`) to prevent unauthorized edit triggers.
-
-- Built accessible `EditProfileModal` component connected to `PATCH /api/profile` for live name and bio updates with optimistic UI sync.
-
-- Empty states and error fallbacks cleanly styled to dark-mode design system.
-
-### Milestone 14 — Bookmarks UI & Discovery Search (COMPLETE)
-
-- Mounted `/api/search` route on backend with regex matching across title, content, and tags.
-
-- Made bookmark controllers (`POST /api/bookmarks/:postId` & `DELETE /api/bookmarks/:postId`) idempotent to prevent 409 conflict exceptions on desynced toggles.
-
-- Built `/bookmarks` page wrapped in `ProtectedRoute` with live removal callback (`onBookmarkRemoved`).
-
-- Built `/search` discovery page wrapped in `<Suspense>` to ensure Next.js Turbopack prerender compliance.
-
-- Added Search discovery icon link to global `Navbar`.
-
-- Hydrated initial bookmark state on home feed (`/`) via parallel `Promise.all` queries.
-
-### Current State
-
-Milestones 1–14 are COMPLETE, VERIFIED, and LOCKED.
-
-### Next Milestone
-
-**Milestone 15 — Production Polish, Optimization & Portfolio Presentation**
+Next Milestone
+Milestone 16 — Full Integration & End-to-End Testing
 
 Expected Scope:
 
-- Edge-case validation and error boundary checks.
+End-to-end user verification pass (Auth -> Create Post -> Read -> Edit -> Bookmark -> Search -> Profile -> Settings -> Logout).
 
-- Metadata & OpenGraph tags for social sharing.
-
-- Code cleanup, console log stripping, and final production builds.
-
-- Portfolio README with architecture diagrams and API specs.
+Edge-case testing: Route guards, long code formatting, empty states, and fallback error handling.
 
 12. REMAINING ROADMAP (V1)
-
-Milestone 15: Settings & Theme Controls
-
 Milestone 16: Full Integration & End-to-End Testing
 
 Milestone 17: Performance & Product Polish
