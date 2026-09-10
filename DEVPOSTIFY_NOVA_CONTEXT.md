@@ -362,27 +362,35 @@ Production build verified.
 
 - Verified full roundtrip: create post -> feed rendering -> view post -> delete post.
 
+### Milestone 13 — Profile UI & Edit Profile (COMPLETE)
+
+- Implemented `/profile/[username]` dynamic route fetching developer info and authored posts in parallel (`Promise.all`).
+
+- Built developer-first profile hero card: dynamic initial badge, joined date, bio presentation, and post count metrics.
+
+- Added strict ownership validation (`isOwner`) to prevent unauthorized edit triggers.
+
+- Built accessible `EditProfileModal` component connected to `PATCH /api/profile` for live name and bio updates with optimistic UI sync.
+
+- Empty states and error fallbacks cleanly styled to dark-mode design system.
+
 ### Current State
 
-Milestones 1–12 are COMPLETE, VERIFIED, and LOCKED.
+Milestones 1–13 are COMPLETE, VERIFIED, and LOCKED.
 
 ### Next Milestone
 
-**Milestone 13 — Profile UI**
+**Milestone 14 — Bookmarks UI & Discovery Search**
 
 Expected Scope:
 
-- Public profile page (`/profile/[username]`) fetching user details (`GET /api/profile/:username`)
+- Bookmark toggle button on `PostCard` and Single Post view (`POST /api/bookmarks/:postId`, `DELETE /api/bookmarks/:postId`).
 
-- Display author bio, join date, avatar initial, and tabbed list of posts created by this user
+- Bookmarks view page (`/bookmarks`) rendering user's saved engineering insights.
 
-- Edit Profile modal or settings page (`PATCH /api/profile`) for updating name and bio
-
-- Form validation and ownership protection
+- Top-level or discovery search input hitting `GET /api/search` with keyword & tag filtering.
 
 12. REMAINING ROADMAP (V1)
-
-Milestone 13: Profile UI (Public Profile & Edit Profile)
 
 Milestone 14: Search & Bookmarks UI
 
