@@ -14,6 +14,7 @@ import {
   Calendar,
   Loader2,
   AlertCircle,
+  Edit3,
 } from "lucide-react";
 
 export default function PostDetailPage() {
@@ -142,6 +143,13 @@ export default function PostDetailPage() {
 
           {isAuthor && (
             <div className="flex items-center gap-2">
+              <Link
+                href={`/posts/${post._id}/edit`}
+                className="inline-flex items-center gap-1 rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:border-slate-600 hover:bg-slate-800"
+              >
+                <Edit3 className="h-3.5 w-3.5 text-blue-400" />
+                Edit
+              </Link>
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
