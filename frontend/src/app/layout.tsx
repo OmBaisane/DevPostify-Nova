@@ -30,6 +30,9 @@ export const metadata: Metadata = {
   title: "DevPostify — Where Developers Build Their Identity",
   description:
     "Developer-first professional platform to share technical architecture, engineering learnings, and insights.",
+  icons: {
+    icon: "/brand/devpostify-mark.svg",
+  },
 };
 
 export default function RootLayout({

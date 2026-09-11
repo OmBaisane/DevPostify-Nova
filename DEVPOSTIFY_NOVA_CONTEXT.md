@@ -338,21 +338,39 @@ Locked UI permanently to Developer Dark Mode to guarantee consistent typography 
 
 Added Settings shortcut to global Navbar.
 
-11. CURRENT POSITION
-Current State
-Milestones 1–15 are COMPLETE, VERIFIED, and LOCKED.
+### Milestone 16 — Full Integration & End-to-End Testing (COMPLETE)
 
-Next Milestone
-Milestone 16 — Full Integration & End-to-End Testing
+- Added global fallback error boundaries: developer-first 404 Terminal card (`app/not-found.tsx`) and client hydration failure handler (`app/error.tsx`).
+
+- Configured SVG brand icon metadata in `app/layout.tsx` to cleanly resolve browser `/favicon.ico` 404 requests.
+
+- Validated complete user journeys across all authenticated and unauthenticated flows (Register -> Post Creation -> Reading -> Editing -> Bookmarking -> Search -> Profile updates -> Settings session termination).
+
+- Verified route protection redirects: unauthenticated direct hits on `/create`, `/bookmarks`, and `/settings` bounce cleanly to `/login`.
+
+- Confirmed zero functional regressions across Express controllers and Next.js App Router client components.
+
+11. CURRENT POSITION
+
+### Current State
+
+Milestones 1–16 are COMPLETE, VERIFIED, and LOCKED.
+
+### Next Milestone
+
+**Milestone 17 — Performance & Product Polish**
 
 Expected Scope:
 
-End-to-end user verification pass (Auth -> Create Post -> Read -> Edit -> Bookmark -> Search -> Profile -> Settings -> Logout).
+- Codebase cleanup: stripping temporary debugging console logs and unused imports.
 
-Edge-case testing: Route guards, long code formatting, empty states, and fallback error handling.
+- Toast feedback notifications for smooth user feedback on CRUD & Bookmark operations.
+
+- Dynamic page title and OpenGraph metadata hardening.
+
+- Production build bundle audit (zero TS and zero lint issues across both packages).
 
 12. REMAINING ROADMAP (V1)
-Milestone 16: Full Integration & End-to-End Testing
 
 Milestone 17: Performance & Product Polish
 
