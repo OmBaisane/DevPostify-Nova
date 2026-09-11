@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import { Post } from "@/types/post";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import {
   ArrowLeft,
   Clock,
@@ -21,6 +22,7 @@ export default function PostDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const [post, setPost] = useState<Post | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -56,15 +58,18 @@ export default function PostDetailPage() {
 
     try {
       setIsDeleting(true);
-      await api.delete(`/posts/${post._id}`);
+      await api.delete(`/posts/${id}`);
+      toast("Post deleted successfully", "info");
       router.push("/");
       router.refresh();
     } catch (err) {
       if (err instanceof ApiError) {
-        alert(err.message);
+        setError(err.message);
       } else {
-        alert("Failed to delete post");
+        setError("Failed to delete post.");
       }
+      toast("Failed to delete post", "error");
+      setIsDeleting(false);
     } finally {
       setIsDeleting(false);
     }

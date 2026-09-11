@@ -350,29 +350,35 @@ Added Settings shortcut to global Navbar.
 
 - Confirmed zero functional regressions across Express controllers and Next.js App Router client components.
 
+### Milestone 17 — Performance & Product Polish (COMPLETE)
+
+- Built a custom, zero-dependency `ToastProvider` with micro-animations for developer actions.
+
+- Wired real-time toast feedback to all core actions: Post Creation, Post Editing, Post Deletion, Bookmark toggling, and Profile updates.
+
+- Hardened application metadata: configured dynamic title templates, OpenGraph tags for social sharing, and resolved favicon asset linking.
+
+- Conducted full production build audit: verified zero TypeScript errors and zero prerender warnings across both backend and frontend applications.
+
 11. CURRENT POSITION
 
 ### Current State
 
-Milestones 1–16 are COMPLETE, VERIFIED, and LOCKED.
+Milestones 1–17 are COMPLETE, VERIFIED, and LOCKED.
 
 ### Next Milestone
 
-**Milestone 17 — Performance & Product Polish**
+**Milestone 18 — Production Deployment (Vercel + Render)**
 
 Expected Scope:
 
-- Codebase cleanup: stripping temporary debugging console logs and unused imports.
+- Backend deployment on Render (environment variables, MongoDB Atlas network binding, CORS configuration).
 
-- Toast feedback notifications for smooth user feedback on CRUD & Bookmark operations.
+- Frontend deployment on Vercel (Next.js build settings, production environment variables).
 
-- Dynamic page title and OpenGraph metadata hardening.
-
-- Production build bundle audit (zero TS and zero lint issues across both packages).
+- Live domain testing and full end-to-end cloud verification.
 
 12. REMAINING ROADMAP (V1)
-
-Milestone 17: Performance & Product Polish
 
 Milestone 18: Production Deployment (Vercel + Render)
 

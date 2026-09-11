@@ -7,6 +7,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { api, ApiError } from "@/lib/api";
 import { Post } from "@/types/post";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import { ArrowLeft, Edit3, Eye, Loader2, AlertCircle } from "lucide-react";
 
 const CATEGORY_OPTIONS = [
@@ -26,6 +27,7 @@ export default function EditPostPage() {
   const [category, setCategory] = useState("webdev");
   const [tagsInput, setTagsInput] = useState("");
   const [content, setContent] = useState("");
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
 
   const [isLoading, setIsLoading] = useState(true);
@@ -88,6 +90,7 @@ export default function EditPostPage() {
         content: content.trim(),
       });
 
+      toast("Post updated successfully", "success");
       router.push(`/posts/${id}`);
       router.refresh();
     } catch (err) {
@@ -96,6 +99,7 @@ export default function EditPostPage() {
       } else {
         setError("Failed to update post.");
       }
+      toast("Failed to update post", "error");
     } finally {
       setIsSubmitting(false);
     }

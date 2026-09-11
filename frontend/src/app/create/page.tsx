@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { useToast } from "@/context/ToastContext";
 import { api, ApiError } from "@/lib/api";
 import {
   PenSquare,
@@ -29,6 +30,7 @@ export default function CreatePostPage() {
   const [category, setCategory] = useState("webdev");
   const [tagsInput, setTagsInput] = useState("");
   const [content, setContent] = useState("");
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,6 +58,8 @@ export default function CreatePostPage() {
         tags,
         content: content.trim(),
       });
+
+      toast("Engineering post published successfully!", "success");
 
       router.push("/");
       router.refresh();

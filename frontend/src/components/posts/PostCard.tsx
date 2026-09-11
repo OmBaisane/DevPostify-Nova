@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Post } from "@/types/post";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
 import { Clock, Tag, Bookmark } from "lucide-react";
 
@@ -23,6 +24,7 @@ export default function PostCard({
   const { user } = useAuth();
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked);
   const [isToggling, setIsToggling] = useState(false);
+  const { toast } = useToast();
 
   // Approximate reading time
   const wordCount = post.content?.trim().split(/\s+/).length || 0;
@@ -55,12 +57,14 @@ export default function PostCard({
         if (onBookmarkRemoved) {
           onBookmarkRemoved(post._id);
         }
+        toast("Removed from bookmarks", "info");
       } else {
         await api.post(`/bookmarks/${post._id}`);
+        toast("Saved to bookmarks", "success");
       }
     } catch {
-      // Revert if API fails
       setIsBookmarked(previousState);
+      toast("Failed to update bookmark", "error");
     } finally {
       setIsToggling(false);
     }

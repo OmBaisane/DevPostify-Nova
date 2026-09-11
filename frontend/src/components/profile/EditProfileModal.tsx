@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/context/ToastContext";
 import { X, Loader2, AlertCircle } from "lucide-react";
 
 interface EditProfileModalProps {
@@ -23,6 +24,8 @@ export default function EditProfileModal({
   const { refreshUser } = useAuth();
   const [name, setName] = useState(initialName);
   const [bio, setBio] = useState(initialBio);
+  const { toast } = useToast();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,6 +47,7 @@ export default function EditProfileModal({
         bio: bio.trim(),
       });
 
+      toast("Profile updated successfully", "success");
       await refreshUser();
       onProfileUpdated(name.trim(), bio.trim());
       onClose();
