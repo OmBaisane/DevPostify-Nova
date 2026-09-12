@@ -360,27 +360,34 @@ Added Settings shortcut to global Navbar.
 
 - Conducted full production build audit: verified zero TypeScript errors and zero prerender warnings across both backend and frontend applications.
 
+### Milestone 18 — Production Deployment (Vercel + Render) (COMPLETE)
+
+- Deployed Express/Node.js backend API on Render (`devpostify-nova-api.onrender.com`).
+
+- Connected Render web service to MongoDB Atlas with production network binding and environment variables.
+
+- Configured production CORS credentials handshake between Render and Vercel domains.
+
+- Deployed Next.js App Router frontend on Vercel with zero prerender/manifest routing errors.
+
+- Verified dynamic routing, live post queries, authentication flows, and toast feedback in production.
+
 11. CURRENT POSITION
 
 ### Current State
+All Milestones (1–18) are 100% COMPLETE, VERIFIED, and LIVE IN PRODUCTION.
 
-Milestones 1–17 are COMPLETE, VERIFIED, and LOCKED.
+- Backend: https://devpostify-nova-api.onrender.com
+
+- Frontend: https://dev-postify-nova.vercel.app
+
+- Core Scope: V1 MVP Fully Operational
 
 ### Next Milestone
 
-**Milestone 18 — Production Deployment (Vercel + Render)**
-
-Expected Scope:
-
-- Backend deployment on Render (environment variables, MongoDB Atlas network binding, CORS configuration).
-
-- Frontend deployment on Vercel (Next.js build settings, production environment variables).
-
-- Live domain testing and full end-to-end cloud verification.
+**Milestone 19 — README & Portfolio Polish**
 
 12. REMAINING ROADMAP (V1)
-
-Milestone 18: Production Deployment (Vercel + Render)
 
 Milestone 19: README & Portfolio Polish
 ```
