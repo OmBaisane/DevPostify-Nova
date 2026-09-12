@@ -15,6 +15,9 @@ import { errorHandler } from "./middleware/errorHandler.js";
 
 const app = express();
 
+// Render proxy ke peeche HTTPS headers & secure cookies ko recognize karne ke liye mandatory hai
+app.set("trust proxy", 1);
+
 app.use(
   cors({
     origin: env.CLIENT_URL,
