@@ -9,6 +9,14 @@ import { sendSuccess } from "../utils/apiResponse.js";
 
 const COOKIE_NAME = "devpostify_token";
 
+const isProduction = process.env.NODE_ENV === "production";
+
+const getAuthCookieOptions = () => ({
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: (isProduction ? "none" : "lax") as "none" | "lax",
+});
+
 export const register = async (req: Request, res: Response) => {
   const { username, email, password, name } = req.body;
 
@@ -74,9 +82,7 @@ export const register = async (req: Request, res: Response) => {
   const token = createAccessToken(user._id.toString());
 
   res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    ...getAuthCookieOptions(),
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -116,7 +122,6 @@ export const login = async (req: Request, res: Response) => {
     });
   }
 
-  // Find user by either email or username
   const user = await UserModel.findOne({
     $or: [{ email: normalizedIdentifier }, { username: normalizedIdentifier }],
   }).select("+password");
@@ -140,9 +145,7 @@ export const login = async (req: Request, res: Response) => {
   const token = createAccessToken(user._id.toString());
 
   res.cookie(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    ...getAuthCookieOptions(),
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
@@ -194,11 +197,7 @@ export const getMe = async (req: Request, res: Response) => {
 };
 
 export const logout = async (_req: Request, res: Response) => {
-  res.clearCookie(COOKIE_NAME, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-  });
+  res.clearCookie(COOKIE_NAME, getAuthCookieOptions());
 
   return sendSuccess(res, 200, "Logout successful");
 };
