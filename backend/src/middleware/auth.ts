@@ -5,10 +5,24 @@ import { UserModel } from "../models/User";
 
 const COOKIE_NAME = "devpostify_token";
 
-type AuthPayload = {
+interface AuthPayload {
   userId: string;
-};
+}
 
+// Augment Express Request interface strictly across middleware boundary
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: string;
+    }
+  }
+}
+
+/**
+ * Authentication Gatekeeper Middleware.
+ * Extracts and verifies JWT from cross-domain HTTP-Only secure cookies.
+ * Performs database existence verification to invalidate stale or revoked sessions immediately.
+ */
 export const requireAuth = async (
   req: Request,
   res: Response,
@@ -24,6 +38,7 @@ export const requireAuth = async (
       });
     }
 
+    // Verify cryptographic signature against server secret
     const decoded = jwt.verify(token, env.JWT_SECRET) as AuthPayload;
 
     if (!decoded.userId) {
@@ -33,7 +48,8 @@ export const requireAuth = async (
       });
     }
 
-    const user = await UserModel.findById(decoded.userId);
+    // Ensure the associated user record has not been purged from MongoDB
+    const user = await UserModel.findById(decoded.userId).select("_id");
 
     if (!user) {
       return res.status(401).json({
@@ -42,9 +58,10 @@ export const requireAuth = async (
       });
     }
 
+    // Attach validated identity ID for downstream controllers
     req.userId = user._id.toString();
 
-    next();
+    return next();
   } catch {
     return res.status(401).json({
       success: false,

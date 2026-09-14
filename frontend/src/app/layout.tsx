@@ -55,7 +55,7 @@ export default function RootLayout({
       lang="en"
       className={`dark ${poppins.variable} ${inter.variable} ${jetbrains.variable}`}
     >
-      <body className="min-h-screen bg-slate-950 font-sans text-slate-100 antialiased selection:bg-blue-600/30 selection:text-blue-200">
+      <body className="flex min-h-screen flex-col bg-slate-950 font-sans text-slate-100 antialiased selection:bg-blue-600/30 selection:text-blue-200">
         <AuthProvider>
           <ToastProvider>
             <Navbar />
