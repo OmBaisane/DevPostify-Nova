@@ -26,7 +26,7 @@ export default function PostCard({
   const [isToggling, setIsToggling] = useState(false);
   const { toast } = useToast();
 
-  // Approximate reading time
+  // Average reading speed calculation (~200 wpm)
   const wordCount = post.content?.trim().split(/\s+/).length || 0;
   const readTime = Math.max(1, Math.ceil(wordCount / 200));
 
@@ -36,6 +36,10 @@ export default function PostCard({
     year: "numeric",
   });
 
+  /**
+   * Optimistically toggles the bookmark status on the UI.
+   * If the network call fails, reverts to previous state to maintain UI parity.
+   */
   const handleBookmarkToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -72,8 +76,8 @@ export default function PostCard({
 
   return (
     <article className="card-surface p-5 sm:p-6 transition-all duration-200 hover:border-slate-700/80 hover:shadow-lg hover:shadow-blue-500/5">
-      {/* Author Header & Bookmark Action */}
-      <div className="flex items-center justify-between mb-4">
+      {/* Author & Timestamp Header */}
+      <header className="flex items-center justify-between mb-4">
         <Link
           href={`/profile/${post.author?.username}`}
           className="flex items-center gap-2.5 group"
@@ -82,9 +86,9 @@ export default function PostCard({
             {post.author?.name ? post.author.name.charAt(0).toUpperCase() : "U"}
           </div>
           <div>
-            <h4 className="text-xs font-medium text-slate-200 group-hover:text-blue-400 transition">
+            <h3 className="text-xs font-medium text-slate-200 group-hover:text-blue-400 transition">
               {post.author?.name || "Developer"}
-            </h4>
+            </h3>
             <p className="text-[11px] text-slate-400 font-mono">
               @{post.author?.username || "anonymous"}
             </p>
@@ -117,9 +121,9 @@ export default function PostCard({
             />
           </button>
         </div>
-      </div>
+      </header>
 
-      {/* Post Title & Excerpt */}
+      {/* Post Heading & Excerpt */}
       <div className="mb-4">
         <Link href={`/posts/${post._id}`} className="group">
           <h2 className="font-heading text-lg font-semibold text-slate-100 group-hover:text-blue-400 transition line-clamp-2 mb-2">
@@ -131,8 +135,8 @@ export default function PostCard({
         </Link>
       </div>
 
-      {/* Category & Tags Footer */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-800/60 text-xs">
+      {/* Category Tags & Direct Link Footer */}
+      <footer className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-800/60 text-xs">
         <div className="flex flex-wrap items-center gap-2">
           <span className="inline-flex items-center rounded-md bg-blue-500/10 px-2 py-0.5 text-[11px] font-medium text-blue-400 border border-blue-500/20">
             {post.category}
@@ -155,7 +159,7 @@ export default function PostCard({
         >
           Read post →
         </Link>
-      </div>
+      </footer>
     </article>
   );
 }

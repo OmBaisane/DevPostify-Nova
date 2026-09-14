@@ -31,6 +31,10 @@ export default function FeedPage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Concurrently hydrates the global feed and user's bookmark state.
+   * Parallelizing these requests minimizes layout shift and time-to-interactive.
+   */
   const fetchPostsAndBookmarks = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -45,7 +49,6 @@ export default function FeedPage() {
         params.category = selectedCategory;
       }
 
-      // Fetch feed posts and (if logged in) current bookmarks in parallel
       const postsPromise = api.get<PostsResponseData>("/posts", { params });
       const bookmarksPromise = user
         ? api.get<{ bookmarks: BookmarkItem[] }>("/bookmarks")
@@ -84,9 +87,9 @@ export default function FeedPage() {
   }, [fetchPostsAndBookmarks]);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      {/* Feed Hero */}
-      <section className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800/80 pb-6">
+    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      {/* Community Hero & Identity Header */}
+      <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800/80 pb-6">
         <div>
           <div className="flex items-center gap-2 text-xs font-mono text-blue-400 mb-1">
             <Sparkles className="h-3.5 w-3.5" />
@@ -107,16 +110,21 @@ export default function FeedPage() {
           <PenSquare className="h-3.5 w-3.5" />
           Share Insight
         </Link>
-      </section>
+      </header>
 
-      {/* Category Pills Filter */}
-      <div className="mb-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      {/* Category Pills Navigation Filter */}
+      <nav
+        aria-label="Filter posts by category"
+        className="mb-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none"
+      >
         {CATEGORIES.map((cat) => {
           const isActive = selectedCategory === cat.value;
           return (
             <button
               key={cat.label}
+              type="button"
               onClick={() => setSelectedCategory(cat.value)}
+              aria-pressed={isActive}
               className={`rounded-xl px-3.5 py-1.5 text-xs font-medium transition whitespace-nowrap ${
                 isActive
                   ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
@@ -127,17 +135,20 @@ export default function FeedPage() {
             </button>
           );
         })}
-      </div>
+      </nav>
 
-      {/* Error state */}
+      {/* Resilient Error Presentation */}
       {error && (
-        <div className="mb-6 rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-xs text-red-400">
+        <div
+          role="alert"
+          className="mb-6 rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-xs text-red-400"
+        >
           {error}
         </div>
       )}
 
-      {/* Feed List */}
-      <div className="space-y-4">
+      {/* Streamlined Post List Section */}
+      <section aria-label="Engineering Posts Feed" className="space-y-4">
         {isLoading ? (
           <>
             <PostSkeleton />
@@ -164,7 +175,7 @@ export default function FeedPage() {
             actionHref="/create"
           />
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
