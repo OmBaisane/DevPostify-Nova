@@ -18,8 +18,9 @@ export default function SettingsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-        <div className="mb-6">
+      <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+        {/* Navigation Breadcrumb */}
+        <nav aria-label="Breadcrumb" className="mb-6">
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 text-xs text-slate-400 transition hover:text-slate-200"
@@ -27,9 +28,10 @@ export default function SettingsPage() {
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to feed
           </Link>
-        </div>
+        </nav>
 
-        <div className="mb-8 border-b border-slate-800/80 pb-6">
+        {/* Page Identity Header */}
+        <header className="mb-8 border-b border-slate-800/80 pb-6">
           <h1 className="font-heading text-2xl font-bold tracking-tight text-slate-100 sm:text-3xl">
             Account Settings
           </h1>
@@ -37,12 +39,18 @@ export default function SettingsPage() {
             Manage your developer preferences, security credentials, and active
             session.
           </p>
-        </div>
+        </header>
 
         <div className="space-y-6">
-          {/* Appearance / Theme Settings */}
-          <div className="card-surface p-6">
-            <h2 className="font-heading text-base font-semibold text-slate-200 mb-1">
+          {/* Locked Design Palette Specification */}
+          <section
+            aria-labelledby="appearance-heading"
+            className="card-surface p-6"
+          >
+            <h2
+              id="appearance-heading"
+              className="font-heading text-base font-semibold text-slate-200 mb-1"
+            >
               Interface Appearance
             </h2>
             <p className="text-xs text-slate-400 mb-4">
@@ -55,35 +63,41 @@ export default function SettingsPage() {
               <span>Developer Dark Mode</span>
               <CheckCircle2 className="h-3.5 w-3.5 text-blue-400 ml-1" />
             </div>
-          </div>
+          </section>
 
-          {/* Account Credentials Card */}
-          <div className="card-surface p-6">
-            <h2 className="font-heading text-base font-semibold text-slate-200 mb-1">
+          {/* Account Credentials / Security Overview */}
+          <section
+            aria-labelledby="credentials-heading"
+            className="card-surface p-6"
+          >
+            <h2
+              id="credentials-heading"
+              className="font-heading text-base font-semibold text-slate-200 mb-1"
+            >
               Account Credentials
             </h2>
             <p className="text-xs text-slate-400 mb-4">
               Core identity identifiers registered with DevPostify Nova.
             </p>
 
-            <div className="space-y-3 font-mono text-xs">
+            <dl className="space-y-3 font-mono text-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/60 pb-3 gap-1">
-                <span className="text-slate-500">Username</span>
-                <span className="text-slate-200">@{user?.username}</span>
+                <dt className="text-slate-500">Username</dt>
+                <dd className="text-slate-200">@{user?.username}</dd>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-800/60 pb-3 gap-1">
-                <span className="text-slate-500">Registered Email</span>
-                <span className="text-slate-200">{user?.email}</span>
+                <dt className="text-slate-500">Registered Email</dt>
+                <dd className="text-slate-200">{user?.email}</dd>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-1 gap-1">
-                <span className="text-slate-500">Security</span>
-                <span className="inline-flex items-center gap-1 text-emerald-400 text-[11px]">
+                <dt className="text-slate-500">Security</dt>
+                <dd className="inline-flex items-center gap-1 text-emerald-400 text-[11px]">
                   <Shield className="h-3 w-3" /> HTTP-Only Secure JWT
-                </span>
+                </dd>
               </div>
-            </div>
+            </dl>
 
-            <div className="mt-5 pt-4 border-t border-slate-800/60">
+            <footer className="mt-5 pt-4 border-t border-slate-800/60">
               <Link
                 href={`/profile/${user?.username}`}
                 className="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:underline"
@@ -91,12 +105,18 @@ export default function SettingsPage() {
                 <span>View & edit public profile information</span>
                 <ExternalLink className="h-3 w-3" />
               </Link>
-            </div>
-          </div>
+            </footer>
+          </section>
 
-          {/* Danger / Session Zone */}
-          <div className="card-surface p-6 border-red-500/20">
-            <h2 className="font-heading text-base font-semibold text-red-400 mb-1">
+          {/* Session Termination / Danger Action */}
+          <section
+            aria-labelledby="session-heading"
+            className="card-surface p-6 border-red-500/20"
+          >
+            <h2
+              id="session-heading"
+              className="font-heading text-base font-semibold text-red-400 mb-1"
+            >
               Session Management
             </h2>
             <p className="text-xs text-slate-400 mb-4">
@@ -110,9 +130,9 @@ export default function SettingsPage() {
               <LogOut className="h-4 w-4" />
               <span>Log out of DevPostify</span>
             </button>
-          </div>
+          </section>
         </div>
-      </div>
+      </main>
     </ProtectedRoute>
   );
 }

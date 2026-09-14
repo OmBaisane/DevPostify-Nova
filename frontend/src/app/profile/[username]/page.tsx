@@ -30,6 +30,9 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
+  /**
+   * Hydrates public profile metrics and author posts simultaneously.
+   */
   useEffect(() => {
     async function fetchProfile() {
       if (!username) return;
@@ -58,6 +61,7 @@ export default function ProfilePage() {
     fetchProfile();
   }, [username]);
 
+  // Restrict profile mutations strictly to the authenticated account owner
   const isOwner =
     currentUser && profileUser && currentUser.username === profileUser.username;
 
@@ -73,7 +77,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         <div className="card-surface p-8 mb-8 animate-pulse space-y-4">
           <div className="flex items-center gap-4">
             <div className="h-20 w-20 rounded-full bg-slate-800" />
@@ -88,14 +92,14 @@ export default function ProfilePage() {
           <PostSkeleton />
           <PostSkeleton />
         </div>
-      </div>
+      </main>
     );
   }
 
   if (error || !profileUser) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
-        <div className="card-surface p-8 text-center">
+      <main className="mx-auto max-w-3xl px-4 py-12">
+        <div role="alert" className="card-surface p-8 text-center">
           <AlertCircle className="mx-auto mb-3 h-8 w-8 text-red-400" />
           <h2 className="font-heading text-lg font-semibold text-slate-200">
             {error || "User not found"}
@@ -107,7 +111,7 @@ export default function ProfilePage() {
             Return to Feed
           </Link>
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -117,9 +121,9 @@ export default function ProfilePage() {
   });
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      {/* Back Link */}
-      <div className="mb-6">
+    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      {/* Navigation Breadcrumb */}
+      <nav aria-label="Breadcrumb" className="mb-6">
         <Link
           href="/"
           className="inline-flex items-center gap-1.5 text-xs text-slate-400 transition hover:text-slate-200"
@@ -127,13 +131,13 @@ export default function ProfilePage() {
           <ArrowLeft className="h-3.5 w-3.5" />
           Back to feed
         </Link>
-      </div>
+      </nav>
 
-      {/* Profile Header Card */}
-      <section className="card-surface p-6 sm:p-8 mb-8 shadow-2xl">
+      {/* Developer Profile Header Card */}
+      <header className="card-surface p-6 sm:p-8 mb-8 shadow-2xl">
         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
-            {/* Avatar Initial */}
+            {/* Avatar Badge */}
             <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-blue-600 to-purple-600 text-2xl font-bold font-heading text-white shadow-xl shadow-blue-500/10 border border-white/10">
               {profileUser.name
                 ? profileUser.name.charAt(0).toUpperCase()
@@ -158,7 +162,7 @@ export default function ProfilePage() {
                 </p>
               )}
 
-              {/* Meta stats */}
+              {/* Developer Metadata Attributes */}
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-4 text-xs font-mono text-slate-400">
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5 text-slate-500" />
@@ -173,23 +177,27 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          {/* Action Button for Profile Owner */}
+          {/* Owner-Only Account Configuration Actions */}
           {isOwner && (
             <button
               onClick={() => setIsEditModalOpen(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-xs font-medium text-slate-200 hover:border-slate-600 hover:bg-slate-850 transition self-center sm:self-start shrink-0"
+              aria-label="Edit personal profile"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-xs font-medium text-slate-200 hover:border-slate-600 hover:bg-slate-800 transition self-center sm:self-start shrink-0"
             >
               <Settings className="h-3.5 w-3.5 text-slate-400" />
               Edit Profile
             </button>
           )}
         </div>
-      </section>
+      </header>
 
-      {/* User's Published Posts Section */}
-      <section>
+      {/* Author Engineering Articles Section */}
+      <section aria-labelledby="published-articles-heading">
         <div className="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-3">
-          <h2 className="font-heading text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+          <h2
+            id="published-articles-heading"
+            className="font-heading text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-2"
+          >
             <PenTool className="h-4 w-4 text-blue-400" />
             Published Articles ({posts.length})
           </h2>
@@ -213,7 +221,7 @@ export default function ProfilePage() {
         </div>
       </section>
 
-      {/* Edit Profile Modal */}
+      {/* Modal for Modifying User Profile Metadata */}
       {isOwner && (
         <EditProfileModal
           isOpen={isEditModalOpen}
@@ -223,6 +231,6 @@ export default function ProfilePage() {
           onProfileUpdated={handleProfileUpdated}
         />
       )}
-    </div>
+    </main>
   );
 }
