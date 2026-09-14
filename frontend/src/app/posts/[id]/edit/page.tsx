@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
 import { api, ApiError } from "@/lib/api";
 import { Post } from "@/types/post";
 import { useAuth } from "@/context/AuthContext";
@@ -22,12 +23,12 @@ export default function EditPostPage() {
   const { id } = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("webdev");
   const [tagsInput, setTagsInput] = useState("");
   const [content, setContent] = useState("");
-  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
 
   const [isLoading, setIsLoading] = useState(true);
@@ -43,7 +44,7 @@ export default function EditPostPage() {
         const res = await api.get<Post>(`/posts/${id}`);
         if (res.data) {
           const postData = res.data;
-          // Ownership verification
+          // Guard: prevent non-authors from editing
           if (user && postData.author?._id !== user._id) {
             router.replace(`/posts/${id}`);
             return;
@@ -118,8 +119,11 @@ export default function EditPostPage() {
 
   return (
     <ProtectedRoute>
-      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-        <div className="mb-6">
+      <section
+        className="mx-auto max-w-4xl px-4 py-8 sm:px-6"
+        aria-labelledby="edit-post-heading"
+      >
+        <nav aria-label="Breadcrumb" className="mb-6">
           <Link
             href={`/posts/${id}`}
             className="inline-flex items-center gap-1.5 text-xs text-slate-400 transition hover:text-slate-200"
@@ -127,21 +131,27 @@ export default function EditPostPage() {
             <ArrowLeft className="h-3.5 w-3.5" />
             Back to article
           </Link>
-        </div>
+        </nav>
 
         <div className="card-surface p-6 sm:p-8 shadow-2xl">
-          <div className="mb-6 border-b border-slate-800/80 pb-4">
-            <h1 className="font-heading text-2xl font-bold text-slate-100 flex items-center gap-2">
+          <header className="mb-6 border-b border-slate-800/80 pb-4">
+            <h1
+              id="edit-post-heading"
+              className="font-heading text-2xl font-bold text-slate-100 flex items-center gap-2"
+            >
               <Edit3 className="h-6 w-6 text-blue-500" />
               Edit Engineering Post
             </h1>
             <p className="text-xs text-slate-400 mt-1">
               Update technical details, refine explanation, or modify tags.
             </p>
-          </div>
+          </header>
 
           {error && (
-            <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-xs text-red-400">
+            <div
+              role="alert"
+              className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-xs text-red-400"
+            >
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -210,12 +220,21 @@ export default function EditPostPage() {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-medium text-slate-300">
+                <label
+                  htmlFor="content"
+                  className="text-xs font-medium text-slate-300"
+                >
                   Content (Markdown supported)
                 </label>
-                <div className="flex items-center gap-1 rounded-xl bg-slate-900 border border-slate-800 p-0.5">
+                <div
+                  role="tablist"
+                  aria-label="Editor views"
+                  className="flex items-center gap-1 rounded-xl bg-slate-900 border border-slate-800 p-0.5"
+                >
                   <button
                     type="button"
+                    role="tab"
+                    aria-selected={activeTab === "write"}
                     onClick={() => setActiveTab("write")}
                     className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition ${
                       activeTab === "write"
@@ -228,6 +247,8 @@ export default function EditPostPage() {
                   </button>
                   <button
                     type="button"
+                    role="tab"
+                    aria-selected={activeTab === "preview"}
                     onClick={() => setActiveTab("preview")}
                     className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-medium transition ${
                       activeTab === "preview"
@@ -243,6 +264,7 @@ export default function EditPostPage() {
 
               {activeTab === "write" ? (
                 <textarea
+                  id="content"
                   required
                   rows={14}
                   value={content}
@@ -251,9 +273,12 @@ export default function EditPostPage() {
                   className="w-full input-surface p-4 font-mono text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition leading-relaxed resize-y"
                 />
               ) : (
-                <div className="w-full min-h-87.5 input-surface p-4 text-xs sm:text-sm leading-relaxed overflow-y-auto whitespace-pre-wrap font-sans text-slate-200 bg-slate-900/50">
+                <div
+                  role="tabpanel"
+                  className="w-full min-h-87.5 input-surface p-5 text-xs sm:text-sm leading-relaxed overflow-y-auto bg-slate-900/40 rounded-xl border border-slate-800"
+                >
                   {content.trim() ? (
-                    content
+                    <MarkdownRenderer content={content} />
                   ) : (
                     <span className="text-slate-500 italic">
                       No content to preview.
@@ -273,7 +298,7 @@ export default function EditPostPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn-primary px-6 py-2.5 text-xs font-medium shadow-md shadow-blue-600/20 disabled:opacity-50"
+                className="btn-primary px-6 py-2.5 text-xs font-medium shadow-md shadow-blue-600/20 disabled:opacity-50 inline-flex items-center"
               >
                 {isSubmitting ? (
                   <>
@@ -287,7 +312,7 @@ export default function EditPostPage() {
             </div>
           </form>
         </div>
-      </div>
+      </section>
     </ProtectedRoute>
   );
 }

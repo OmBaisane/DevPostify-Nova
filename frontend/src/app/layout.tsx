@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { ToastProvider } from "@/context/ToastContext";
 import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -60,7 +61,8 @@ export default function RootLayout({
           <AuthProvider>
             <ToastProvider>
               <Navbar />
-              <main className="min-h-[calc(100vh-4rem)]">{children}</main>
+              <main className="flex-1">{children}</main>
+              <Footer />
             </ToastProvider>
           </AuthProvider>
         </ThemeProvider>

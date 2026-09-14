@@ -7,6 +7,7 @@ import { api, ApiError } from "@/lib/api";
 import { Post } from "@/types/post";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
 import {
   ArrowLeft,
   Clock,
@@ -205,11 +206,9 @@ export default function PostDetailPage() {
           </div>
         </div>
 
-        {/* Content Body */}
-        <div className="mt-8 leading-relaxed text-slate-200">
-          <div className="whitespace-pre-wrap font-sans text-sm sm:text-base leading-7">
-            {post.content}
-          </div>
+        {/* Rendered Markdown Body */}
+        <div className="mt-8">
+          <MarkdownRenderer content={post.content} />
         </div>
       </div>
     </article>

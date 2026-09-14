@@ -8,6 +8,11 @@ import {
 import { asyncHandler } from "../utils/asyncHandler";
 import { sendSuccess } from "../utils/apiResponse";
 
+// Sanitize user search strings to prevent query injections or malformed text index operations
+const sanitizeSearchQuery = (query: string): string => {
+  return query.trim().slice(0, 100);
+};
+
 // @desc    Create a new post
 // @route   POST /api/posts
 // @access  Private
@@ -54,18 +59,24 @@ export const getPosts = asyncHandler(async (req: Request, res: Response) => {
 
   const filter: Record<string, any> = {};
 
-  if (typeof category === "string" && category.trim() !== "") {
+  if (
+    typeof category === "string" &&
+    category.trim() !== "" &&
+    category !== "All Topics"
+  ) {
     filter.category = category.trim().toLowerCase();
   }
 
-  const isSearchQuery = typeof search === "string" && search.trim() !== "";
-  if (isSearchQuery) {
-    filter.$text = { $search: (search as string).trim() };
+  const hasSearch = typeof search === "string" && search.trim() !== "";
+  if (hasSearch) {
+    // Utilize MongoDB Atlas text search with sanitized string
+    filter.$text = { $search: sanitizeSearchQuery(search as string) };
   }
 
   let query = PostModel.find(filter);
 
-  if (isSearchQuery) {
+  // Score relevance if text search query is executed
+  if (hasSearch) {
     query = query
       .select({ score: { $meta: "textScore" } })
       .sort({ score: { $meta: "textScore" }, createdAt: -1 });
@@ -156,6 +167,7 @@ export const updatePost = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
+  // Idempotent authorization check: only author can update post
   if (post.author.toString() !== userId) {
     return res.status(403).json({
       success: false,
@@ -213,6 +225,7 @@ export const deletePost = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
+  // Idempotent authorization check: only author can delete post
   if (post.author.toString() !== userId) {
     return res.status(403).json({
       success: false,
