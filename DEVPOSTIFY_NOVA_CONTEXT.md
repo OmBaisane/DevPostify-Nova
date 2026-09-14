@@ -70,36 +70,35 @@ PLAN → EXECUTE → VERIFY → TEST → COMMIT → NEXT
 
 ## Landing
 
-- Landing page
+- Landing page / Community feed
 
 ## Authentication
 
-- Register
-- Login
+- Register (synced 8+ char password & alphanumeric username constraints)
+- Login (email or username)
 - Logout
-- JWT authentication
+- Stateless JWT authentication via cross-domain HTTP-Only cookies
 - Protected routes
 
 ## Posts
 
-- Feed
-- Create post
-- View post details
+- Feed with category pills
+- Create post with tabbed Markdown write/preview
+- View post details with AST syntax-highlighted code blocks & clipboard copy
 - Edit own post
 - Delete own post
-- Markdown support
-- Code highlighting
+- Markdown support (`react-markdown` + `remark-gfm`)
 - Categories
 
 ## Profile
 
-- View profile
-- Edit profile
-- My posts
+- View profile by username
+- Edit profile (Name & Bio)
+- Author's published posts listing
 
 ## Discovery
 
-- Search
+- Full-text search with ReDoS/length sanitization
 - Category filtering
 
 ## Bookmarks
@@ -116,12 +115,12 @@ PLAN → EXECUTE → VERIFY → TEST → COMMIT → NEXT
 
 ## UX
 
-- Responsive design
+- Responsive design with off-canvas mobile drawer
 - Loading/skeleton states
 - Empty states
 - Error states
-- Form validation
-- Accessible interactions
+- Form validation (1:1 Frontend vs Backend synchronization)
+- Accessible interactions & HTML5 semantic landmarks
 
 ---
 
@@ -149,6 +148,7 @@ Do not silently expand the V1 scope.
 - Primary: #2563EB
 - Accent: #7C3AED
 - Gradient: Blue → Violet
+- Background: #020617 (Slate-950)
 
 ## Theme
 
@@ -172,8 +172,7 @@ Do not silently expand the V1 scope.
 
 ## Branding
 
-- The provided DevPostify logo reference is the branding source.
-- Scalable vector SVG assets.
+- Scalable vector SVG assets (`/brand/devpostify-mark.svg`).
 - Favicon: Symbol-only logo mark.
 
 ---
@@ -182,39 +181,35 @@ Do not silently expand the V1 scope.
 
 ## Frontend
 
-- Next.js App Router
-- React
-- TypeScript
+- Next.js App Router (15+)
+- React 19
+- TypeScript (Strict)
 - Tailwind CSS
-- Framer Motion
 - Lucide React
+- `react-markdown` & `remark-gfm`
 
 ## Backend
 
 - Node.js
 - Express
 - TypeScript
-- JWT
-- Mongoose
+- JWT (`jsonwebtoken`)
+- Cookie-Parser
+- Mongoose ODM
+- Zod
 
 ## Database
 
 - MongoDB Atlas
 
-## Media
-
-- Cloudinary
-
 ## Deployment
 
-- Frontend: Vercel
-- Backend: Render
+- Frontend: Vercel Edge CDN (`dev-postify-nova.vercel.app`)
+- Backend: Render Web Service (`devpostify-nova-api.onrender.com`)
 
 ---
 
 # 7. ARCHITECTURE
-
-One GitHub repository:
 
 ```text
 DevPostify-Nova/
@@ -223,39 +218,39 @@ DevPostify-Nova/
 ├── README.md
 ├── .gitignore
 └── DEVPOSTIFY_NOVA_CONTEXT.md
-Frontend and backend are separate applications.
-The frontend must NEVER connect directly to MongoDB.
+Frontend and backend are decoupled applications.
+
+Frontend communicates with backend strictly via REST API with credentials: "include".
+
+Backend trusts reverse-proxy hops (trust proxy: 1) to correctly evaluate secure cookie contexts.
 
 8. DATABASE (V1)
-Collections:
-
+Collections
 users
 
 posts
 
 bookmarks
 
-Database principles:
+Database principles
+Sensible validation schemas.
 
-Sensible validation
+Compound unique indexes for deduplication (e.g., user + post on bookmarks).
 
-Compound unique indexes for deduplication
+Timestamps and relations via ObjectId references.
 
-Timestamps and relations
-
-Query indexes and full-text search indexing
+Compound full-text search indexing on posts (title, content, tags).
 
 9. REST API SPECIFICATION & CONVENTIONS
 Auth Middleware: requireAuth (backend/src/middleware/auth.ts)
 
-Request Typing: req.userId attached to Express Request
+Request Typing: req.userId attached via Express namespace augmentation
 
 Models: Named exports (UserModel, PostModel, BookmarkModel)
 
 Response Helpers: sendSuccess (backend/src/utils/apiResponse.ts)
 
-Endpoints:
-
+Endpoints
 POST /api/auth/register
 
 POST /api/auth/login
@@ -284,9 +279,9 @@ POST /api/bookmarks/:postId
 
 DELETE /api/bookmarks/:postId
 
-GET /api/search
+GET /api/health
 
-10. COMPLETED MILESTONES (1–15)
+10. COMPLETED MILESTONES (1–19)
 Milestone 1 — Project Setup (COMPLETE)
 DevPostify Nova repository initialized. Frontend & Backend setups verified.
 
@@ -297,7 +292,7 @@ Milestone 3 — Backend Foundation (COMPLETE)
 Express + TypeScript structure, MongoDB connection, central error handling, environment setup.
 
 Milestone 4 — Database / Mongoose Foundation (COMPLETE)
-User, Post, and Bookmark schemas initialized. Corrected auther typo to author.
+User, Post, and Bookmark schemas initialized. Corrected author population.
 
 Milestone 5 — Authentication System (COMPLETE)
 Register, login, logout, HTTP-only JWT cookies, requireAuth middleware, GET /api/auth/me.
@@ -327,67 +322,57 @@ Milestone 13 — Profile UI & Edit Profile (COMPLETE)
 Dynamic route /profile/[username], developer hero card, post metrics, and EditProfileModal connected to PATCH /api/profile.
 
 Milestone 14 — Bookmarks UI & Discovery Search (COMPLETE)
-Mounted /api/search with keyword regex matching, idempotent bookmark toggling, /bookmarks page, and Suspense-wrapped /search discovery page.
+Idempotent bookmark toggling, /bookmarks page, and text-query discovery feed.
 
 Milestone 15 — Post Actions & Settings (COMPLETE)
-Implemented /posts/[id]/edit workflow with author verification and PATCH /api/posts/:id integration.
+Implemented /posts/[id]/edit workflow with author verification and PATCH /api/posts/:id integration. Built protected /settings view with registered credentials summary and authenticated session termination.
 
-Built protected /settings view with registered credentials summary and authenticated session termination.
+Milestone 16 — Full Integration & End-to-End Testing (COMPLETE)
+Added global fallback error boundaries: developer-first 404 Terminal card (app/not-found.tsx) and client hydration failure handler (app/error.tsx). Validated complete user journeys across all authenticated and unauthenticated flows.
 
-Locked UI permanently to Developer Dark Mode to guarantee consistent typography contrast and zero visual regressions.
+Milestone 17 — Performance & Product Polish (COMPLETE)
+Built a custom, zero-dependency ToastProvider with micro-animations for developer actions. Wired real-time toast feedback to all core actions. Full production build audit verified.
 
-Added Settings shortcut to global Navbar.
+Milestone 18 — Production Deployment (Vercel + Render) (COMPLETE)
+Deployed Express/Node.js backend API on Render (devpostify-nova-api.onrender.com). Connected to MongoDB Atlas with production network binding. Deployed Next.js App Router frontend on Vercel (dev-postify-nova.vercel.app).
 
-### Milestone 16 — Full Integration & End-to-End Testing (COMPLETE)
+Milestone 19 — Final Hardening, Accessibility, Security & Release Freeze (COMPLETE)
+Mobile Responsive Drawer: Built a full off-canvas navigation drawer with backdrop blur, scroll locks, and escape-key handling.
 
-- Added global fallback error boundaries: developer-first 404 Terminal card (`app/not-found.tsx`) and client hydration failure handler (`app/error.tsx`).
+Safe Markdown Rendering: Integrated unified AST markdown pipeline with GFM support, overflow-contained code blocks, and copy-to-clipboard actions across Detail, Create, and Edit views.
 
-- Configured SVG brand icon metadata in `app/layout.tsx` to cleanly resolve browser `/favicon.ico` 404 requests.
+Semantic HTML & a11y Audit: Refactored layouts, feed, bookmarks, post cards, author profile, and settings into strict HTML5 semantic landmarks (<main>, <header>, <article>, <nav>, <section>, <dl>).
 
-- Validated complete user journeys across all authenticated and unauthenticated flows (Register -> Post Creation -> Reading -> Editing -> Bookmarking -> Search -> Profile updates -> Settings session termination).
+Security & Validation Hardening: Synchronized 8-character password constraint and alphanumeric username validation across client and server. Enforced explicit SameSite=None; Secure; path=/ cookies. Sanitized search inputs against ReDoS vectors.
 
-- Verified route protection redirects: unauthenticated direct hits on `/create`, `/bookmarks`, and `/settings` bounce cleanly to `/login`.
+Codebase Cleanup & Type Safety: Eliminated any types across controllers and API client using explicit query interfaces. Pruned dead theme contexts and temporary console logs. Sanitized /api/health probe against environment disclosure.
 
-- Confirmed zero functional regressions across Express controllers and Next.js App Router client components.
-
-### Milestone 17 — Performance & Product Polish (COMPLETE)
-
-- Built a custom, zero-dependency `ToastProvider` with micro-animations for developer actions.
-
-- Wired real-time toast feedback to all core actions: Post Creation, Post Editing, Post Deletion, Bookmark toggling, and Profile updates.
-
-- Hardened application metadata: configured dynamic title templates, OpenGraph tags for social sharing, and resolved favicon asset linking.
-
-- Conducted full production build audit: verified zero TypeScript errors and zero prerender warnings across both backend and frontend applications.
-
-### Milestone 18 — Production Deployment (Vercel + Render) (COMPLETE)
-
-- Deployed Express/Node.js backend API on Render (`devpostify-nova-api.onrender.com`).
-
-- Connected Render web service to MongoDB Atlas with production network binding and environment variables.
-
-- Configured production CORS credentials handshake between Render and Vercel domains.
-
-- Deployed Next.js App Router frontend on Vercel with zero prerender/manifest routing errors.
-
-- Verified dynamic routing, live post queries, authentication flows, and toast feedback in production.
+Portfolio-Grade Documentation: Standardized root README.md with deployment badges, architecture topology, and comprehensive local setup instructions.
 
 11. CURRENT POSITION
+Current State
+All Milestones (1–19) are 100% COMPLETE, AUDITED, VERIFIED, and LIVE IN PRODUCTION.
 
-### Current State
-All Milestones (1–18) are 100% COMPLETE, VERIFIED, and LIVE IN PRODUCTION.
+Frontend App: https://dev-postify-nova.vercel.app
 
-- Backend: https://devpostify-nova-api.onrender.com
+Backend API: https://devpostify-nova-api.onrender.com
 
-- Frontend: https://dev-postify-nova.vercel.app
+Health Check: https://devpostify-nova-api.onrender.com/api/health
 
-- Core Scope: V1 MVP Fully Operational
+V1 Scope Status: FROZEN & SIGNED OFF
 
-### Next Milestone
+12. FUTURE ROADMAP (POST-V1 / V2 CANDIDATES)
+The following features are strictly deferred to future iterations and are outside V1 scope:
 
-**Milestone 19 — README & Portfolio Polish**
+Nested comment threads on engineering posts
 
-12. REMAINING ROADMAP (V1)
+Clap / Upvote technical reaction system
 
-Milestone 19: README & Portfolio Polish
+Author follow / following graph
+
+In-app notification feed for author activity
+
+Syntax-highlighted code snippet sharing playground
+
+GitHub OAuth integration & repository cards
 ```
