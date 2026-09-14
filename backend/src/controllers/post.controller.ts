@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import mongoose from "mongoose";
-import { PostModel } from "../models/Post";
+import { PostModel, type Post } from "../models/Post";
 import {
   createPostSchema,
   updatePostSchema,
@@ -8,7 +8,9 @@ import {
 import { asyncHandler } from "../utils/asyncHandler";
 import { sendSuccess } from "../utils/apiResponse";
 
-// Sanitize user search strings to prevent query injections or malformed text index operations
+/**
+ * Truncates and sanitizes incoming text search input to prevent query abuse.
+ */
 const sanitizeSearchQuery = (query: string): string => {
   return query.trim().slice(0, 100);
 };
@@ -57,7 +59,16 @@ export const getPosts = asyncHandler(async (req: Request, res: Response) => {
 
   const { category, search } = req.query;
 
-  const filter: Record<string, any> = {};
+  // Enforce strict typing over Mongoose filter query instead of generic any
+  // Explicit type definition for query filter criteria (eliminates `any`)
+  interface PostQueryFilter {
+    category?: string;
+    $text?: {
+      $search: string;
+    };
+  }
+
+  const filter: PostQueryFilter = {};
 
   if (
     typeof category === "string" &&
@@ -69,13 +80,12 @@ export const getPosts = asyncHandler(async (req: Request, res: Response) => {
 
   const hasSearch = typeof search === "string" && search.trim() !== "";
   if (hasSearch) {
-    // Utilize MongoDB Atlas text search with sanitized string
     filter.$text = { $search: sanitizeSearchQuery(search as string) };
   }
 
   let query = PostModel.find(filter);
 
-  // Score relevance if text search query is executed
+  // Score relevance if full-text search is invoked; otherwise sort chronologically
   if (hasSearch) {
     query = query
       .select({ score: { $meta: "textScore" } })
@@ -167,7 +177,7 @@ export const updatePost = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
-  // Idempotent authorization check: only author can update post
+  // Ensure only the original author can mutate the document
   if (post.author.toString() !== userId) {
     return res.status(403).json({
       success: false,
@@ -225,7 +235,7 @@ export const deletePost = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
-  // Idempotent authorization check: only author can delete post
+  // Ensure only the original author can purge the document
   if (post.author.toString() !== userId) {
     return res.status(403).json({
       success: false,
