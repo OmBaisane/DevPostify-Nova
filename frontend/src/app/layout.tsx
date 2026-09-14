@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Poppins, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
-import { ThemeProvider } from "@/context/ThemeContext";
 import { ToastProvider } from "@/context/ToastContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -57,15 +56,13 @@ export default function RootLayout({
       className={`dark ${poppins.variable} ${inter.variable} ${jetbrains.variable}`}
     >
       <body className="min-h-screen bg-slate-950 font-sans text-slate-100 antialiased selection:bg-blue-600/30 selection:text-blue-200">
-        <ThemeProvider>
-          <AuthProvider>
-            <ToastProvider>
-              <Navbar />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </ToastProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ToastProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </ToastProvider>
+        </AuthProvider>
       </body>
     </html>
   );
