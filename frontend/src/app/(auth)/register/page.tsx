@@ -8,6 +8,9 @@ import { useAuth } from "@/context/AuthContext";
 import { ApiError } from "@/lib/api";
 import { UserPlus, Loader2, AlertCircle } from "lucide-react";
 
+// Developer-safe username regex: only letters, numbers, underscores, hyphens
+const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
+
 export default function RegisterPage() {
   const router = useRouter();
   const { user, register } = useAuth();
@@ -22,7 +25,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Authenticated hone par direct redirect
+  // Redirect to root if already authenticated
   useEffect(() => {
     if (user) {
       router.replace("/");
@@ -42,7 +45,7 @@ export default function RegisterPage() {
     e.preventDefault();
     setError(null);
 
-    // Client-side quick validations
+    // Client-side synchronous validation matching backend authority
     if (
       !formData.name.trim() ||
       !formData.username.trim() ||
@@ -53,8 +56,15 @@ export default function RegisterPage() {
       return;
     }
 
-    if (formData.username.length < 3) {
-      setError("Username must be at least 3 characters long.");
+    if (formData.username.length < 3 || formData.username.length > 30) {
+      setError("Username must be between 3 and 30 characters.");
+      return;
+    }
+
+    if (!USERNAME_REGEX.test(formData.username)) {
+      setError(
+        "Username can only contain letters, numbers, underscores, and hyphens.",
+      );
       return;
     }
 
@@ -79,10 +89,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md card-surface p-8 shadow-2xl">
+    <main className="flex min-h-screen items-center justify-center p-4">
+      <section
+        className="w-full max-w-md card-surface p-8 shadow-2xl"
+        aria-labelledby="register-heading"
+      >
         {/* Brand Header */}
-        <div className="flex flex-col items-center text-center mb-8">
+        <header className="flex flex-col items-center text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-3">
             <Image
               src="/brand/devpostify-mark.svg"
@@ -95,17 +108,23 @@ export default function RegisterPage() {
               DevPostify
             </span>
           </Link>
-          <h1 className="text-xl font-semibold text-slate-100">
+          <h1
+            id="register-heading"
+            className="text-xl font-semibold text-slate-100"
+          >
             Create your account
           </h1>
           <p className="text-sm text-slate-400 mt-1">
             Join the developer-first identity platform
           </p>
-        </div>
+        </header>
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+          <div
+            role="alert"
+            className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400"
+          >
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -125,6 +144,7 @@ export default function RegisterPage() {
               name="name"
               type="text"
               required
+              maxLength={80}
               placeholder="Linus Torvalds"
               value={formData.name}
               onChange={handleChange}
@@ -146,6 +166,8 @@ export default function RegisterPage() {
               type="text"
               autoComplete="username"
               required
+              minLength={3}
+              maxLength={30}
               placeholder="torvalds"
               value={formData.username}
               onChange={handleChange}
@@ -188,7 +210,8 @@ export default function RegisterPage() {
               type="password"
               autoComplete="new-password"
               required
-              placeholder="At least 6 characters"
+              minLength={8}
+              placeholder="At least 8 characters"
               value={formData.password}
               onChange={handleChange}
               disabled={isSubmitting}
@@ -203,12 +226,12 @@ export default function RegisterPage() {
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin inline" />
                 Creating account...
               </>
             ) : (
               <>
-                <UserPlus className="mr-2 h-4 w-4" />
+                <UserPlus className="mr-2 h-4 w-4 inline" />
                 Create Account
               </>
             )}
@@ -216,7 +239,7 @@ export default function RegisterPage() {
         </form>
 
         {/* Footer */}
-        <div className="mt-6 text-center text-xs text-slate-400">
+        <footer className="mt-6 text-center text-xs text-slate-400">
           Already have an account?{" "}
           <Link
             href="/login"
@@ -224,8 +247,8 @@ export default function RegisterPage() {
           >
             Sign in
           </Link>
-        </div>
-      </div>
-    </div>
+        </footer>
+      </section>
+    </main>
   );
 }

@@ -19,7 +19,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Already authenticated hone par direct feed par redirect
+  // Redirect to root if already authenticated
   useEffect(() => {
     if (user) {
       router.replace("/");
@@ -59,10 +59,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <div className="w-full max-w-md card-surface p-8 shadow-2xl">
+    <main className="flex min-h-screen items-center justify-center p-4">
+      <section
+        className="w-full max-w-md card-surface p-8 shadow-2xl"
+        aria-labelledby="login-heading"
+      >
         {/* Brand Header */}
-        <div className="flex flex-col items-center text-center mb-8">
+        <header className="flex flex-col items-center text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2 mb-3">
             <Image
               src="/brand/devpostify-mark.svg"
@@ -75,15 +78,23 @@ export default function LoginPage() {
               DevPostify
             </span>
           </Link>
-          <h1 className="text-xl font-semibold text-slate-100">Welcome back</h1>
+          <h1
+            id="login-heading"
+            className="text-xl font-semibold text-slate-100"
+          >
+            Welcome back
+          </h1>
           <p className="text-sm text-slate-400 mt-1">
             Sign in to continue building your developer identity
           </p>
-        </div>
+        </header>
 
         {/* Error Alert */}
         {error && (
-          <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400">
+          <div
+            role="alert"
+            className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3 text-sm text-red-400"
+          >
             <AlertCircle className="h-4 w-4 shrink-0" />
             <span>{error}</span>
           </div>
@@ -104,7 +115,7 @@ export default function LoginPage() {
               type="text"
               autoComplete="username"
               required
-              placeholder="developer@example.com or octocat"
+              placeholder="developer@example.com or torvalds"
               value={formData.emailOrUsername}
               onChange={handleChange}
               disabled={isSubmitting}
@@ -140,12 +151,12 @@ export default function LoginPage() {
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin inline" />
                 Signing in...
               </>
             ) : (
               <>
-                <LogIn className="mr-2 h-4 w-4" />
+                <LogIn className="mr-2 h-4 w-4 inline" />
                 Sign in
               </>
             )}
@@ -153,7 +164,7 @@ export default function LoginPage() {
         </form>
 
         {/* Footer */}
-        <div className="mt-6 text-center text-xs text-slate-400">
+        <footer className="mt-6 text-center text-xs text-slate-400">
           Don&apos;t have an account?{" "}
           <Link
             href="/register"
@@ -161,8 +172,8 @@ export default function LoginPage() {
           >
             Create one
           </Link>
-        </div>
-      </div>
-    </div>
+        </footer>
+      </section>
+    </main>
   );
 }
