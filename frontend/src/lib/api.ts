@@ -1,7 +1,7 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   message: string;
   data?: T;
@@ -28,7 +28,12 @@ interface RequestOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
 }
 
-export async function apiRequest<T = any>(
+/**
+ * Universal client-side HTTP bridge.
+ * Enforces credentials: "include" for secure cross-domain cookie propagation
+ * across disparate Vercel edge and Render origin hosts.
+ */
+export async function apiRequest<T = unknown>(
   endpoint: string,
   options: RequestOptions = {},
 ): Promise<ApiResponse<T>> {
@@ -60,7 +65,7 @@ export async function apiRequest<T = any>(
       ...defaultHeaders,
       ...headers,
     },
-    credentials: "include", // Required for HTTP-only cookies
+    credentials: "include", // Enforce cross-domain SameSite=None cookie transmission
     ...customConfig,
   };
 
@@ -82,23 +87,31 @@ export async function apiRequest<T = any>(
 }
 
 export const api = {
-  get: <T = any>(endpoint: string, options?: RequestOptions) =>
+  get: <T = unknown>(endpoint: string, options?: RequestOptions) =>
     apiRequest<T>(endpoint, { ...options, method: "GET" }),
 
-  post: <T = any>(endpoint: string, body?: any, options?: RequestOptions) =>
+  post: <T = unknown>(
+    endpoint: string,
+    body?: unknown,
+    options?: RequestOptions,
+  ) =>
     apiRequest<T>(endpoint, {
       ...options,
       method: "POST",
       body: body ? JSON.stringify(body) : undefined,
     }),
 
-  patch: <T = any>(endpoint: string, body?: any, options?: RequestOptions) =>
+  patch: <T = unknown>(
+    endpoint: string,
+    body?: unknown,
+    options?: RequestOptions,
+  ) =>
     apiRequest<T>(endpoint, {
       ...options,
       method: "PATCH",
       body: body ? JSON.stringify(body) : undefined,
     }),
 
-  delete: <T = any>(endpoint: string, options?: RequestOptions) =>
+  delete: <T = unknown>(endpoint: string, options?: RequestOptions) =>
     apiRequest<T>(endpoint, { ...options, method: "DELETE" }),
 };

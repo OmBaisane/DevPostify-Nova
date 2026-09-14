@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { api, ApiError } from "@/lib/api";
+import { api } from "@/lib/api";
 import {
   User,
   LoginCredentials,
@@ -20,10 +20,19 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Global Authentication Provider.
+ * Maintains authenticated user state across the Next.js App Router boundary.
+ * Relies on cross-origin HttpOnly cookies verified by the backend `/auth/me` route.
+ */
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  /**
+   * Probes current session validity on initial mount or post-action refresh.
+   * Silent rejection ensures unauthenticated visitors encounter no blocking errors.
+   */
   const refreshUser = async () => {
     try {
       const response = await api.get<AuthResponseData>("/auth/me");
