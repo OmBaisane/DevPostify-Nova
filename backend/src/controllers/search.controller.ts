@@ -1,27 +1,44 @@
 import type { Request, Response } from "express";
 import { PostModel } from "../models/Post.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendSuccess } from "../utils/apiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-// @desc    Search posts by query keyword
-// @route   GET /api/search?q=keyword
-// @access  Public
+/**
+ * Escapes special regex characters to neutralize ReDoS vectors.
+ */
+function escapeRegex(text: string): string {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}
+
 export const searchPosts = asyncHandler(async (req: Request, res: Response) => {
-  const query = typeof req.query.q === "string" ? req.query.q.trim() : "";
+  const rawQuery = typeof req.query.q === "string" ? req.query.q : "";
+  const sanitizedQuery = rawQuery.trim().slice(0, 100);
 
-  if (!query) {
-    return sendSuccess(res, 200, "Search query is empty", { posts: [] });
+  if (!sanitizedQuery) {
+    return sendSuccess(res, 200, "Search results fetched successfully", {
+      posts: [],
+      query: "",
+    });
   }
 
-  // Case-insensitive regex match across title, content, and tags
-  const regex = new RegExp(query, "i");
+  // Safe escaped regex pattern for fuzzy token search
+  const safeRegex = new RegExp(escapeRegex(sanitizedQuery), "i");
 
   const posts = await PostModel.find({
-    $or: [{ title: regex }, { content: regex }, { tags: regex }],
+    $or: [
+      { title: safeRegex },
+      { content: safeRegex },
+      { tags: safeRegex },
+      { category: safeRegex },
+    ],
   })
-    .sort({ createdAt: -1 })
     .populate("author", "name username avatar")
-    .limit(20);
+    .sort({ createdAt: -1 })
+    .limit(20)
+    .lean();
 
-  return sendSuccess(res, 200, "Posts matched successfully", { posts });
+  return sendSuccess(res, 200, "Search results fetched successfully", {
+    posts,
+    query: sanitizedQuery,
+  });
 });

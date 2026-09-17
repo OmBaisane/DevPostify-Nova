@@ -1,101 +1,49 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Check, Copy } from "lucide-react";
+import { Copy, Check } from "lucide-react";
+import Prism from "prismjs";
+
+// Common developer language grammars
+import "prismjs/components/prism-javascript";
+import "prismjs/components/prism-typescript";
+import "prismjs/components/prism-jsx";
+import "prismjs/components/prism-tsx";
+import "prismjs/components/prism-json";
+import "prismjs/components/prism-bash";
+import "prismjs/components/prism-python";
+import "prismjs/components/prism-markdown";
+import "prismjs/components/prism-css";
+import "prismjs/components/prism-sql";
 
 interface MarkdownRendererProps {
   content: string;
+  className?: string;
 }
 
-export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
-  content,
-}) => {
-  return (
-    <div className="w-full text-slate-300 font-sans leading-relaxed wrap-break-words">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          h1: ({ children }) => (
-            <h1 className="mt-8 mb-4 font-heading text-2xl sm:text-3xl font-bold tracking-tight text-white border-b border-slate-800/80 pb-2">
-              {children}
-            </h1>
-          ),
-          h2: ({ children }) => (
-            <h2 className="mt-6 mb-3 font-heading text-xl sm:text-2xl font-semibold tracking-tight text-slate-100">
-              {children}
-            </h2>
-          ),
-          h3: ({ children }) => (
-            <h3 className="mt-5 mb-2 font-heading text-lg sm:text-xl font-semibold text-slate-200">
-              {children}
-            </h3>
-          ),
-          p: ({ children }) => (
-            <p className="my-3 leading-7 text-slate-300">{children}</p>
-          ),
-          ul: ({ children }) => (
-            <ul className="my-3 list-disc pl-6 space-y-1.5 text-slate-300">
-              {children}
-            </ul>
-          ),
-          ol: ({ children }) => (
-            <ol className="my-3 list-decimal pl-6 space-y-1.5 text-slate-300">
-              {children}
-            </ol>
-          ),
-          li: ({ children }) => <li className="leading-7">{children}</li>,
-          blockquote: ({ children }) => (
-            <blockquote className="my-4 border-l-4 border-blue-500 bg-slate-900/50 py-2 pl-4 pr-3 italic text-slate-400 rounded-r-xl">
-              {children}
-            </blockquote>
-          ),
-          a: ({ href, children }) => (
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-400 underline decoration-blue-500/40 underline-offset-4 transition-colors hover:text-blue-300"
-            >
-              {children}
-            </a>
-          ),
-          code({ className, children, ...props }) {
-            const isInline =
-              !className &&
-              typeof children === "string" &&
-              !children.includes("\n");
+interface CodeBlockProps {
+  language: string;
+  code: string;
+}
 
-            if (isInline) {
-              return (
-                <code
-                  className="rounded-md bg-slate-800/90 px-1.5 py-0.5 font-mono text-xs sm:text-sm text-violet-300 border border-slate-700/60"
-                  {...props}
-                >
-                  {children}
-                </code>
-              );
-            }
-
-            const codeText = String(children).replace(/\n$/, "");
-            const language = className?.replace(/language-/, "") || "text";
-
-            return <CodeBlock code={codeText} language={language} />;
-          },
-        }}
-      >
-        {content}
-      </ReactMarkdown>
-    </div>
-  );
-};
-
-const CodeBlock: React.FC<{ code: string; language: string }> = ({
-  code,
-  language,
-}) => {
+function CodeBlock({ language, code }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
+  const [highlightedCode, setHighlightedCode] = useState<string>("");
+
+  useEffect(() => {
+    const lang = language.toLowerCase();
+    if (Prism.languages[lang]) {
+      try {
+        setHighlightedCode(Prism.highlight(code, Prism.languages[lang], lang));
+      } catch {
+        setHighlightedCode("");
+      }
+    } else {
+      setHighlightedCode("");
+    }
+  }, [code, language]);
 
   const handleCopy = async () => {
     try {
@@ -108,34 +56,98 @@ const CodeBlock: React.FC<{ code: string; language: string }> = ({
   };
 
   return (
-    <div className="relative my-5 overflow-hidden rounded-xl border border-slate-800 bg-slate-900/90 shadow-lg">
-      <div className="flex h-9 items-center justify-between border-b border-slate-800 bg-slate-950/70 px-4">
-        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-slate-400">
-          {language}
+    <div className="group relative my-4 overflow-hidden rounded-xl border border-slate-800 bg-slate-950 font-mono text-xs">
+      <div className="flex items-center justify-between border-b border-slate-800/80 bg-slate-900/60 px-4 py-2 text-slate-400">
+        <span className="text-[11px] font-medium tracking-wider uppercase text-blue-400">
+          {language || "code"}
         </span>
         <button
+          type="button"
           onClick={handleCopy}
-          aria-label="Copy code"
-          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs text-slate-400 transition-colors hover:bg-slate-800 hover:text-white"
+          aria-label="Copy snippet"
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-800 bg-slate-900/80 px-2 py-1 text-[11px] text-slate-300 hover:border-slate-700 hover:text-white transition"
         >
           {copied ? (
             <>
-              <Check className="h-3.5 w-3.5 text-emerald-400" />
+              <Check className="h-3 w-3 text-emerald-400" />
               <span className="text-emerald-400">Copied</span>
             </>
           ) : (
             <>
-              <Copy className="h-3.5 w-3.5" />
+              <Copy className="h-3 w-3" />
               <span>Copy</span>
             </>
           )}
         </button>
       </div>
-      <div className="overflow-x-auto p-4">
-        <pre className="font-mono text-xs sm:text-sm leading-relaxed text-slate-200">
-          <code>{code}</code>
-        </pre>
+
+      <div className="overflow-x-auto p-4 leading-relaxed">
+        {highlightedCode ? (
+          <pre className="m-0 bg-transparent p-0 text-slate-200">
+            <code
+              className={`language-${language}`}
+              dangerouslySetInnerHTML={{ __html: highlightedCode }}
+            />
+          </pre>
+        ) : (
+          <pre className="m-0 bg-transparent p-0 text-slate-200">
+            <code>{code}</code>
+          </pre>
+        )}
       </div>
     </div>
   );
-};
+}
+
+export function MarkdownRenderer({
+  content,
+  className = "",
+}: MarkdownRendererProps) {
+  return (
+    <div className={`text-slate-300 leading-relaxed ${className}`}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          code({ className: codeClassName, children, ...props }) {
+            const match = /language-(\w+)/.exec(codeClassName || "");
+            const isInline = !match && !String(children).includes("\n");
+
+            if (isInline) {
+              return (
+                <code
+                  className="rounded-md border border-slate-800 bg-slate-900/80 px-1.5 py-0.5 font-mono text-[0.85em] text-blue-300"
+                  {...props}
+                >
+                  {children}
+                </code>
+              );
+            }
+
+            return (
+              <CodeBlock
+                language={match ? match[1] : "text"}
+                code={String(children).replace(/\n$/, "")}
+              />
+            );
+          },
+          a({ href, children }) {
+            return (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 underline underline-offset-4 hover:text-blue-300 transition"
+              >
+                {children}
+              </a>
+            );
+          },
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
+export default MarkdownRenderer;

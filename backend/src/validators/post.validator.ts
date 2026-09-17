@@ -1,37 +1,30 @@
-import z, { trim } from "zod";
+import { z } from "zod";
+
+export const V1_CATEGORIES = [
+  "webdev",
+  "architecture",
+  "devops",
+  "opensource",
+  "ai",
+] as const;
 
 export const createPostSchema = z.object({
   title: z
     .string()
     .trim()
-    .min(3, "Title must be at least 3 characters")
+    .min(5, "Title must be at least 5 characters")
     .max(160, "Title cannot exceed 160 characters"),
-
-  content: z.string().min(1, "Content is required"),
-
-  category: z
+  content: z
     .string()
     .trim()
-    .min(1, "Category is required")
-    .max(50, "Category cannot exceed 50 characters"),
-
+    .min(20, "Post content must be at least 20 characters"),
+  category: z.enum(["webdev", "architecture", "devops", "opensource", "ai"], {
+    message: "Please select a valid engineering category",
+  }),
   tags: z
-    .array(z.string().trim().min(1).max(30))
-    .max(10, "Maximum 10 tags are allowed")
+    .array(z.string().trim().toLowerCase())
+    .max(5, "You can specify up to 5 tags")
     .default([]),
-
-  coverImage: z
-    .string()
-    .url("Cover image must be a valid URL")
-    .optional()
-    .or(z.literal("")),
 });
 
-export const updatePostSchema = createPostSchema
-  .partial()
-  .refine((data) => Object.keys(data).length > 0, {
-    message: "At least one field is required",
-  });
-
-export type createPostInput = z.infer<typeof createPostSchema>;
-export type updatePostSchema = z.infer<typeof updatePostSchema>;
+export const updatePostSchema = createPostSchema.partial();
