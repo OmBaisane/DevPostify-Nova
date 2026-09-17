@@ -84,11 +84,11 @@ PLAN → EXECUTE → VERIFY → TEST → COMMIT → NEXT
 
 - Feed with category pills
 - Create post with tabbed Markdown write/preview
-- View post details with AST syntax-highlighted code blocks & clipboard copy
-- Edit own post
+- View post details with AST syntax-highlighted code blocks (`prismjs`) & clipboard copy
+- Edit own post (160-character title limit parity)
 - Delete own post
-- Markdown support (`react-markdown` + `remark-gfm`)
-- Categories
+- Markdown support (`react-markdown` + `remark-gfm` + `prismjs`)
+- 5 locked engineering categories: `webdev`, `architecture`, `devops`, `opensource`, `ai`
 
 ## Profile
 
@@ -98,7 +98,7 @@ PLAN → EXECUTE → VERIFY → TEST → COMMIT → NEXT
 
 ## Discovery
 
-- Full-text search with ReDoS/length sanitization
+- Full-text search with ReDoS/length sanitization (`escapeRegex` + 100-character cap)
 - Category filtering
 
 ## Bookmarks
@@ -186,7 +186,7 @@ Do not silently expand the V1 scope.
 - TypeScript (Strict)
 - Tailwind CSS
 - Lucide React
-- `react-markdown` & `remark-gfm`
+- `react-markdown`, `remark-gfm`, `prismjs`
 
 ## Backend
 
@@ -279,7 +279,9 @@ POST /api/bookmarks/:postId
 
 DELETE /api/bookmarks/:postId
 
-GET /api/health
+GET /api/search (Sanitized regex and length-bounded search)
+
+GET /api/health (Sanitized uptime probe)
 
 10. COMPLETED MILESTONES (1–19)
 Milestone 1 — Project Setup (COMPLETE)
@@ -337,21 +339,21 @@ Milestone 18 — Production Deployment (Vercel + Render) (COMPLETE)
 Deployed Express/Node.js backend API on Render (devpostify-nova-api.onrender.com). Connected to MongoDB Atlas with production network binding. Deployed Next.js App Router frontend on Vercel (dev-postify-nova.vercel.app).
 
 Milestone 19 — Final Hardening, Accessibility, Security & Release Freeze (COMPLETE)
+Real Syntax Highlighting: Integrated prismjs tokenization pipeline supporting JS, TS, TSX, JSON, Bash, Python, Markdown, CSS, and SQL with clipboard copy.
+
+Search Security: Sanitized /api/search using escapeRegex and a 100-character input cap to neutralize ReDoS attack vectors.
+
+Validation Consistency: Enforced identical 160-character post title limits and locked category schemas across client inputs and Zod validators.
+
 Mobile Responsive Drawer: Built a full off-canvas navigation drawer with backdrop blur, scroll locks, and escape-key handling.
 
-Safe Markdown Rendering: Integrated unified AST markdown pipeline with GFM support, overflow-contained code blocks, and copy-to-clipboard actions across Detail, Create, and Edit views.
+Semantic HTML & a11y: Standardized layouts, feed, bookmarks, post cards, author profile, and settings into HTML5 semantic landmarks (<main>, <header>, <article>, <nav>, <section>, <dl>).
 
-Semantic HTML & a11y Audit: Refactored layouts, feed, bookmarks, post cards, author profile, and settings into strict HTML5 semantic landmarks (<main>, <header>, <article>, <nav>, <section>, <dl>).
-
-Security & Validation Hardening: Synchronized 8-character password constraint and alphanumeric username validation across client and server. Enforced explicit SameSite=None; Secure; path=/ cookies. Sanitized search inputs against ReDoS vectors.
-
-Codebase Cleanup & Type Safety: Eliminated any types across controllers and API client using explicit query interfaces. Pruned dead theme contexts and temporary console logs. Sanitized /api/health probe against environment disclosure.
-
-Portfolio-Grade Documentation: Standardized root README.md with deployment badges, architecture topology, and comprehensive local setup instructions.
+Production Hardening: Enforced SameSite=None; Secure; path=/ cookies, sanitized /api/health probes against environment leaks, eliminated any types, and pruned boilerplate artifacts.
 
 11. CURRENT POSITION
 Current State
-All Milestones (1–19) are 100% COMPLETE, AUDITED, VERIFIED, and LIVE IN PRODUCTION.
+All Milestones (1–19) are 100% COMPLETE, SURGICALLY HARDENED, AUDITED, VERIFIED, and LIVE IN PRODUCTION.
 
 Frontend App: https://dev-postify-nova.vercel.app
 
