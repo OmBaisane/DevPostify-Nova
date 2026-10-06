@@ -6,6 +6,7 @@ import { env } from "./config/env.js";
 import healthRoutes from "./routes/health.routes.js";
 import authRoutes from "./routes/auth.routes.js";
 import postRoutes from "./routes/post.routes.js";
+import uploadRoutes from "./routes/upload.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
 import bookmarkRoutes from "./routes/bookmark.routes.js";
 import searchRoutes from "./routes/search.routes.js";
@@ -39,6 +40,7 @@ app.get("/", (_req, res) => {
 app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
+app.use("/api/upload", uploadRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/bookmarks", bookmarkRoutes);
 app.use("/api/search", searchRoutes);
