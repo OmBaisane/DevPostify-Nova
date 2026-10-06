@@ -1,45 +1,71 @@
-import { Schema, model, type InferSchemaType } from "mongoose";
+import mongoose, { Document, Model, Schema } from "mongoose";
 
-const postSchema = new Schema(
+export interface Post {
+  title: string;
+  content: string;
+  category: string;
+  tags: string[];
+  coverImage?: string;
+  isDraft: boolean;
+  reactionsCount: number;
+  commentsCount: number;
+  author: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface PostDocument extends Post, Document {}
+
+const PostSchema = new Schema<PostDocument>(
   {
-    author: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true,
-    },
-
     title: {
       type: String,
       required: true,
       trim: true,
-      minlength: 3,
+      minlength: 5,
       maxlength: 160,
     },
-
     content: {
       type: String,
       required: true,
-      minlength: 1,
+      trim: true,
+      minlength: 20,
     },
-
     category: {
       type: String,
       required: true,
       trim: true,
       lowercase: true,
-      maxlength: 50,
       index: true,
     },
-
     tags: {
       type: [String],
       default: [],
     },
-
     coverImage: {
       type: String,
       default: "",
+    },
+    isDraft: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    reactionsCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    commentsCount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    author: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
     },
   },
   {
@@ -47,16 +73,17 @@ const postSchema = new Schema(
   },
 );
 
-// Query indexes
-postSchema.index({ createdAt: -1 });
-postSchema.index({ category: 1, createdAt: -1 });
+// Compound indexing for high-performance feed sorting and draft segregation
+PostSchema.index({ isDraft: 1, createdAt: -1 });
+PostSchema.index({ isDraft: 1, category: 1, createdAt: -1 });
+PostSchema.index({ isDraft: 1, reactionsCount: -1 });
 
-// Full-text search index with field weighting
-postSchema.index(
-  { title: "text", content: "text", tags: "text" },
-  { weights: { title: 10, tags: 5, content: 1 }, name: "PostTextSearchIndex" },
-);
+// Full-text search index for keyword discovery
+PostSchema.index({
+  title: "text",
+  content: "text",
+  tags: "text",
+});
 
-export type Post = InferSchemaType<typeof postSchema>;
-
-export const PostModel = model<Post>("Post", postSchema);
+export const PostModel: Model<PostDocument> =
+  mongoose.models.Post || mongoose.model<PostDocument>("Post", PostSchema);
