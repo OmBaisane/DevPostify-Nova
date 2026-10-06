@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/common/SocialIcons";
 import { api, ApiError } from "@/lib/api";
+import { useAuth } from "@/context/AuthContext";
 import { User } from "@/types/auth";
 import { Post } from "@/types/post";
 import PostCard from "@/components/posts/PostCard";
@@ -21,7 +22,7 @@ interface ProfileResponseData {
   user: User;
   posts: Post[];
   postsCount: number;
-  isOwner: boolean;
+  isOwner?: boolean;
 }
 
 export default function ProfilePage({
@@ -32,6 +33,7 @@ export default function ProfilePage({
   const resolvedParams = use(params);
   const username = resolvedParams.username;
 
+  const { user: currentUser } = useAuth();
   const [profileData, setProfileData] = useState<ProfileResponseData | null>(
     null,
   );
@@ -93,11 +95,21 @@ export default function ProfilePage({
     );
   }
 
-  const { user, posts, postsCount, isOwner } = profileData;
+  const { user, posts, postsCount } = profileData;
   const formattedDate = new Date(user.createdAt).toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
   });
+
+  // Client-side authentication authority check
+  const isOwner =
+    Boolean(profileData.isOwner) ||
+    Boolean(
+      currentUser &&
+      (currentUser.username.toLowerCase() === username.toLowerCase() ||
+        currentUser._id === user._id ||
+        currentUser.id === user._id),
+    );
 
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">

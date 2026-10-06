@@ -5,7 +5,7 @@ import {
   getPostById,
   getPosts,
   updatePost,
-} from "../controllers/post.controller";
+} from "../controllers/post.controller.js";
 import {
   toggleReaction,
   getReactionStatus,
@@ -14,7 +14,7 @@ import {
   getComments,
   createComment,
 } from "../controllers/comment.controller.js";
-import { requireAuth } from "../middleware/auth";
+import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
 

@@ -214,6 +214,18 @@ export default function PostDetailPage() {
           </div>
         </div>
 
+        {/* Post Cover Banner */}
+        {post.coverImage && (
+          <div className="my-6 rounded-2xl overflow-hidden border border-slate-800 max-h-96 bg-slate-950">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={post.coverImage}
+              alt={post.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
         {/* Rendered Markdown Body */}
         <div className="mt-8">
           <MarkdownRenderer content={post.content} />

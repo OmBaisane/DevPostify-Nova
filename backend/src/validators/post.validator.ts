@@ -25,6 +25,8 @@ export const createPostSchema = z.object({
     .array(z.string().trim().toLowerCase())
     .max(5, "You can specify up to 5 tags")
     .default([]),
+  coverImage: z.string().trim().optional(),
+  isDraft: z.boolean().optional(),
 });
 
 export const updatePostSchema = createPostSchema.partial();
