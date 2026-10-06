@@ -8,6 +8,7 @@ import { Post } from "@/types/post";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import ReactionButton from "@/components/posts/ReactionButton";
+import CommentSection from "@/components/posts/CommentSection";
 import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
 import {
   ArrowLeft,
@@ -217,6 +218,10 @@ export default function PostDetailPage() {
         <div className="mt-8">
           <MarkdownRenderer content={post.content} />
         </div>
+        <CommentSection
+          postId={post._id}
+          commentsCount={post.commentsCount || 0}
+        />
       </div>
     </article>
   );
