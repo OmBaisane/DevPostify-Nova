@@ -7,6 +7,8 @@ import { Post } from "@/types/post";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { api } from "@/lib/api";
+import { MessageSquare } from "lucide-react";
+import ReactionButton from "./ReactionButton";
 import { Clock, Tag, Bookmark } from "lucide-react";
 
 interface PostCardProps {
@@ -105,21 +107,37 @@ export default function PostCard({
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={handleBookmarkToggle}
-            disabled={isToggling}
-            aria-label={isBookmarked ? "Remove bookmark" : "Save bookmark"}
-            className={`p-1.5 rounded-lg border transition ${
-              isBookmarked
-                ? "border-blue-500/50 bg-blue-500/10 text-blue-400"
-                : "border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:border-slate-700"
-            }`}
-          >
-            <Bookmark
-              className={`h-3.5 w-3.5 ${isBookmarked ? "fill-blue-400" : ""}`}
-            />
-          </button>
+          <div className="flex items-center justify-between pt-4 border-t border-slate-800/60 mt-4">
+            <div className="flex items-center gap-2">
+              <ReactionButton
+                postId={post._id}
+                initialCount={post.reactionsCount || 0}
+                initialIsReacted={post.isReactedByMe || false}
+                size="sm"
+              />
+
+              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-slate-800 bg-slate-900/40 text-xs text-slate-400">
+                <MessageSquare className="w-3.5 h-3.5 text-slate-500" />
+                <span>{post.commentsCount || 0}</span>
+              </span>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleBookmarkToggle}
+              disabled={isToggling}
+              aria-label={isBookmarked ? "Remove bookmark" : "Save bookmark"}
+              className={`p-1.5 rounded-lg border transition ${
+                isBookmarked
+                  ? "border-blue-500/50 bg-blue-500/10 text-blue-400"
+                  : "border-slate-800 bg-slate-900/60 text-slate-400 hover:text-slate-200 hover:border-slate-700"
+              }`}
+            >
+              <Bookmark
+                className={`h-3.5 w-3.5 ${isBookmarked ? "fill-blue-400" : ""}`}
+              />
+            </button>
+          </div>
         </div>
       </header>
 

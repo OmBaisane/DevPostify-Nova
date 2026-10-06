@@ -7,6 +7,7 @@ import { api, ApiError } from "@/lib/api";
 import { Post } from "@/types/post";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import ReactionButton from "@/components/posts/ReactionButton";
 import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
 import {
   ArrowLeft,
@@ -146,6 +147,12 @@ export default function PostDetailPage() {
               </span>
             ))}
           </div>
+          <ReactionButton
+            postId={post._id}
+            initialCount={post.reactionsCount || 0}
+            initialIsReacted={post.isReactedByMe || false}
+            size="md"
+          />
 
           {isAuthor && (
             <div className="flex items-center gap-2">
