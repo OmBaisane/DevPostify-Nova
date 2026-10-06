@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { api } from "@/lib/api";
 import {
   PenSquare,
   Bookmark,
@@ -14,6 +15,7 @@ import {
   Settings,
   Menu,
   X,
+  Bell,
   Compass,
 } from "lucide-react";
 
@@ -44,6 +46,30 @@ export default function Navbar() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadCount(0);
+      return;
+    }
+
+    const fetchUnread = async () => {
+      try {
+        const res = await api.get<{ count: number }>(
+          "/notifications/unread-count",
+        );
+        if (typeof res.data?.count === "number") {
+          setUnreadCount(res.data.count);
+        }
+      } catch {
+        // Silent on unmounted/network hiccups
+      }
+    };
+
+    fetchUnread();
+  }, [user, pathname]);
 
   return (
     <>
@@ -123,6 +149,19 @@ export default function Navbar() {
                   <span>{user.username}</span>
                 </Link>
 
+                <Link
+                  href="/notifications"
+                  aria-label="Notifications"
+                  className="relative p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white hover:border-slate-700 transition"
+                >
+                  <Bell className="w-4 h-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white shadow-lg">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </Link>
+
                 <button
                   onClick={logout}
                   className="inline-flex items-center justify-center h-9 w-9 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-red-400 hover:border-slate-700 transition"
@@ -173,19 +212,16 @@ export default function Navbar() {
         role="dialog"
         aria-modal="true"
       >
-        {/* Dark Backdrop */}
         <div
           className="absolute inset-0 bg-black/80 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
         />
 
-        {/* Drawer Box */}
         <aside
           className={`absolute inset-y-0 left-0 flex h-full w-70 max-w-[85vw] flex-col border-r border-slate-800 bg-slate-950 p-5 shadow-2xl transition-transform duration-300 ease-in-out ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
-          {/* Drawer Top Header */}
           <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
             <div className="flex items-center gap-2">
               <Image
@@ -207,11 +243,9 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Navigation Links */}
           <nav className="mt-5 flex-1 overflow-y-auto space-y-2">
             {user ? (
               <>
-                {/* Profile Card */}
                 <Link
                   href={`/profile/${user.username}`}
                   className="flex items-center gap-3 rounded-xl border border-slate-800 bg-slate-900/90 p-3 transition hover:border-slate-700"
@@ -229,7 +263,6 @@ export default function Navbar() {
                   </div>
                 </Link>
 
-                {/* Write Post Button */}
                 <Link
                   href="/create"
                   className="flex items-center justify-center gap-2 btn-primary w-full py-2.5 text-sm font-medium shadow-md shadow-blue-600/20 my-4!"
@@ -245,6 +278,21 @@ export default function Navbar() {
                   >
                     <Compass className="h-4 w-4 text-blue-400" />
                     <span>Explore Feed</span>
+                  </Link>
+
+                  <Link
+                    href="/notifications"
+                    className="flex items-center justify-between rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-900 hover:text-white transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Bell className="h-4 w-4 text-rose-400" />
+                      <span>Notifications</span>
+                    </div>
+                    {unreadCount > 0 && (
+                      <span className="flex h-5 min-w-5 px-1.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
                   </Link>
 
                   <Link
@@ -292,7 +340,6 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* Bottom Sign Out */}
           {user && (
             <div className="border-t border-slate-800/80 pt-3">
               <button

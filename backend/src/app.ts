@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes.js";
 import postRoutes from "./routes/post.routes.js";
 import uploadRoutes from "./routes/upload.routes.js";
 import commentRoutes from "./routes/comment.routes.js";
+import notificationRoutes from "./routes/notification.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
 import bookmarkRoutes from "./routes/bookmark.routes.js";
 import searchRoutes from "./routes/search.routes.js";
@@ -44,6 +45,7 @@ app.use("/api/posts", postRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/notifications", notificationRoutes);
 app.use("/api/bookmarks", bookmarkRoutes);
 app.use("/api/search", searchRoutes);
 
