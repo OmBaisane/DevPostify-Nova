@@ -53,8 +53,8 @@ It must NOT feel like a generic social-media clone.
 - New project must never depend on the old project.
 - Quality and speed are equally important.
 - Build step-by-step through meaningful milestones.
-- Do not over-engineer V1.
-- Do not add features outside the locked V1 scope.
+- Do not over-engineer V1 / V1.1.
+- Do not add features outside the locked scope.
 - Prefer practical production-ready solutions.
 - Keep code clean, maintainable, reusable, and understandable.
 - Verify important work before moving forward.
@@ -66,11 +66,7 @@ PLAN → EXECUTE → VERIFY → TEST → COMMIT → NEXT
 
 ---
 
-# 3. LOCKED V1 FEATURES
-
-## Landing
-
-- Landing page / Community feed
+# 3. CORE V1 & V1.1 FEATURES
 
 ## Authentication
 
@@ -80,301 +76,122 @@ PLAN → EXECUTE → VERIFY → TEST → COMMIT → NEXT
 - Stateless JWT authentication via cross-domain HTTP-Only cookies
 - Protected routes
 
-## Posts
-
-- Feed with category pills
-- Create post with tabbed Markdown write/preview
-- View post details with AST syntax-highlighted code blocks (`prismjs`) & clipboard copy
-- Edit own post (160-character title limit parity)
-- Delete own post
-- Markdown support (`react-markdown` + `remark-gfm` + `prismjs`)
-- 5 locked engineering categories: `webdev`, `architecture`, `devops`, `opensource`, `ai`
-
-## Profile
+## Developer Profiles & Identity (V1.1 Enhanced)
 
 - View profile by username
-- Edit profile (Name & Bio)
+- Edit profile: Name, Bio, Skills (chips), Specialties, and Social links (GitHub, LinkedIn, Website)
+- Direct signed avatar uploads via Cloudinary Edge
 - Author's published posts listing
 
-## Discovery
+## Technical Publishing (V1.1 Enhanced)
 
+- Create, view, edit, and delete own posts
+- Tabbed Markdown write/preview editor (`react-markdown` + `remark-gfm` + `prismjs`)
+- 5 locked engineering categories: `webdev`, `architecture`, `devops`, `opensource`, `ai`
+- Direct signed cover image uploads via Cloudinary Edge
+- Private draft support (`isDraft` toggle)
+
+## Engagement & Discussion (V1.1 New)
+
+- Idempotent post reaction toggle ("Insightful / Liked") with atomic `$inc: 1` / `$inc: -1` counters
+- Flat single-level technical discussion system under posts
+- Author-only comment deletion with atomic counter updates
+- Optimistic UI on reactions and comments
+
+## Notifications (V1.1 New)
+
+- Persisted alert storage for post reactions and comments (self-actions excluded)
+- Navbar bell icon with real-time unread badge count
+- Dedicated `/notifications` activity feed with deep-links and bulk "mark as read"
+
+## Discovery & Bookmarks (V1.1 Enhanced)
+
+- Feed sorting toggle: Latest vs. Top Insights (sorted by reactions)
+- Clickable `#tag` filter chips
 - Full-text search with ReDoS/length sanitization (`escapeRegex` + 100-character cap)
-- Category filtering
+- Bookmark saving, removing, and dedicated `/bookmarks` view
 
-## Bookmarks
-
-- Bookmark post
-- Remove bookmark
-- View bookmarks
-
-## Settings
+## Settings & UX
 
 - Developer dark mode locked default
-- Account credentials overview
-- Session termination
-
-## UX
-
-- Responsive design with off-canvas mobile drawer
-- Loading/skeleton states
-- Empty states
-- Error states
-- Form validation (1:1 Frontend vs Backend synchronization)
-- Accessible interactions & HTML5 semantic landmarks
+- Account credentials overview and session termination
+- Responsive design with off-canvas mobile navigation drawer
+- Loading/skeleton states, empty states, and custom zero-dependency toast system
 
 ---
 
-# 4. EXPLICITLY OUTSIDE V1
+# 4. EXPLICITLY OUT OF SCOPE
 
-Do NOT build these features in V1:
+Do NOT build:
 
-- Chat
-- AI
-- Communities
-- GitHub Sync
-- Notifications
-- Voice
-- Video
-- Realtime features
-
-Do not silently expand the V1 scope.
+- Realtime WebSockets / Socket.IO
+- Chat / DMs
+- AI integrations
+- Communities / Teams
+- Full GitHub synchronization / OAuth
+- Nested comment trees (flat discussions only)
+- Voice / Video
 
 ---
 
 # 5. DESIGN SYSTEM
 
-## Colors
-
-- Primary: #2563EB
-- Accent: #7C3AED
-- Gradient: Blue → Violet
-- Background: #020617 (Slate-950)
-
-## Theme
-
-- Developer Dark Mode is the locked default.
-
-## Typography
-
-- Poppins — headings
-- Inter — body
-- JetBrains Mono — code
-
-## Spacing
-
-- 8px spacing system.
-
-## Radius
-
-- Cards: 16px
-- Buttons: 12px
-- Inputs: 12px
-
-## Branding
-
-- Scalable vector SVG assets (`/brand/devpostify-mark.svg`).
-- Favicon: Symbol-only logo mark.
+- **Colors**: Primary `#2563EB`, Accent `#7C3AED`, Gradient `Blue → Violet`, Background `#020617` (Slate-950)
+- **Typography**: Poppins (headings), Inter (body), JetBrains Mono (code)
+- **Spacing**: 8px system
+- **Radius**: Cards 16px, Buttons 12px, Inputs 12px
 
 ---
 
 # 6. TECH STACK
 
-## Frontend
-
-- Next.js App Router (15+)
-- React 19
-- TypeScript (Strict)
-- Tailwind CSS
-- Lucide React
-- `react-markdown`, `remark-gfm`, `prismjs`
-
-## Backend
-
-- Node.js
-- Express
-- TypeScript
-- JWT (`jsonwebtoken`)
-- Cookie-Parser
-- Mongoose ODM
-- Zod
-
-## Database
-
-- MongoDB Atlas
-
-## Deployment
-
-- Frontend: Vercel Edge CDN (`dev-postify-nova.vercel.app`)
-- Backend: Render Web Service (`devpostify-nova-api.onrender.com`)
+- **Frontend**: Next.js App Router (15+), React 19, TypeScript (Strict), Tailwind CSS, Lucide React, `react-markdown`, `remark-gfm`, `prismjs`
+- **Backend**: Node.js, Express, TypeScript, JWT (`jsonwebtoken`), Cookie-Parser, Mongoose ODM, Zod, Cloudinary SDK
+- **Database**: MongoDB Atlas
+- **Deployments**: Vercel (Frontend), Render (Backend API)
 
 ---
 
-# 7. ARCHITECTURE
-
-```text
-DevPostify-Nova/
-├── frontend/
-├── backend/
-├── README.md
-├── .gitignore
-└── DEVPOSTIFY_NOVA_CONTEXT.md
-Frontend and backend are decoupled applications.
-
-Frontend communicates with backend strictly via REST API with credentials: "include".
-
-Backend trusts reverse-proxy hops (trust proxy: 1) to correctly evaluate secure cookie contexts.
-
-8. DATABASE (V1)
-Collections
-users
-
-posts
-
-bookmarks
-
-Database principles
-Sensible validation schemas.
-
-Compound unique indexes for deduplication (e.g., user + post on bookmarks).
-
-Timestamps and relations via ObjectId references.
-
-Compound full-text search indexing on posts (title, content, tags).
-
-9. REST API SPECIFICATION & CONVENTIONS
-Auth Middleware: requireAuth (backend/src/middleware/auth.ts)
-
-Request Typing: req.userId attached via Express namespace augmentation
-
-Models: Named exports (UserModel, PostModel, BookmarkModel)
-
-Response Helpers: sendSuccess (backend/src/utils/apiResponse.ts)
-
-Endpoints
-POST /api/auth/register
-
-POST /api/auth/login
-
-POST /api/auth/logout
-
-GET /api/auth/me
-
-GET /api/posts (Supports text search ?search=, category ?category=, pagination ?page=&limit=)
-
-GET /api/posts/:id
-
-POST /api/posts
-
-PATCH /api/posts/:id
-
-DELETE /api/posts/:id
-
-GET /api/profile/:username
-
-PATCH /api/profile
-
-GET /api/bookmarks
-
-POST /api/bookmarks/:postId
-
-DELETE /api/bookmarks/:postId
-
-GET /api/search (Sanitized regex and length-bounded search)
-
-GET /api/health (Sanitized uptime probe)
-
-10. COMPLETED MILESTONES (1–19)
-Milestone 1 — Project Setup (COMPLETE)
-DevPostify Nova repository initialized. Frontend & Backend setups verified.
-
-Milestone 2 — Design System Foundation (COMPLETE)
-Design tokens, dark-first theme direction, and typography setup.
-
-Milestone 3 — Backend Foundation (COMPLETE)
-Express + TypeScript structure, MongoDB connection, central error handling, environment setup.
-
-Milestone 4 — Database / Mongoose Foundation (COMPLETE)
-User, Post, and Bookmark schemas initialized. Corrected author population.
-
-Milestone 5 — Authentication System (COMPLETE)
-Register, login, logout, HTTP-only JWT cookies, requireAuth middleware, GET /api/auth/me.
-
-Milestone 6 — Posts System (COMPLETE)
-Full CRUD for posts, ownership validation, author population, pagination.
-
-Milestone 7 — Profile System (COMPLETE)
-Public profile lookup by username with posts (GET /api/profile/:username). Edit own profile (PATCH /api/profile) with validation. Username and email modification locked.
-
-Milestone 8 — Bookmarks System (COMPLETE)
-POST /api/bookmarks/:postId with duplicate protection, DELETE /api/bookmarks/:postId, and GET /api/bookmarks.
-
-Milestone 9 — Discovery: Search & Filtering (COMPLETE)
-MongoDB full-text search index, category filters, and pagination.
-
-Milestone 10 — Frontend Foundation & Design System Setup (COMPLETE)
-Next.js App Router initialized with Google Fonts (Poppins, Inter, JetBrains Mono). Locked design tokens and credentials-enabled type-safe API client.
-
-Milestone 11 — Frontend Authentication (COMPLETE)
-Centralized AuthContext, session hydration, /login & /register views, and ProtectedRoute wrapper.
-
-Milestone 12 — Feed & Post UI (COMPLETE)
-Global responsive Navbar, PostCard with reading-time, shimmer skeletons, category filters, Markdown write/preview editor (/create), and dynamic post detail view (/posts/[id]).
-
-Milestone 13 — Profile UI & Edit Profile (COMPLETE)
-Dynamic route /profile/[username], developer hero card, post metrics, and EditProfileModal connected to PATCH /api/profile.
-
-Milestone 14 — Bookmarks UI & Discovery Search (COMPLETE)
-Idempotent bookmark toggling, /bookmarks page, and text-query discovery feed.
-
-Milestone 15 — Post Actions & Settings (COMPLETE)
-Implemented /posts/[id]/edit workflow with author verification and PATCH /api/posts/:id integration. Built protected /settings view with registered credentials summary and authenticated session termination.
-
-Milestone 16 — Full Integration & End-to-End Testing (COMPLETE)
-Added global fallback error boundaries: developer-first 404 Terminal card (app/not-found.tsx) and client hydration failure handler (app/error.tsx). Validated complete user journeys across all authenticated and unauthenticated flows.
-
-Milestone 17 — Performance & Product Polish (COMPLETE)
-Built a custom, zero-dependency ToastProvider with micro-animations for developer actions. Wired real-time toast feedback to all core actions. Full production build audit verified.
-
-Milestone 18 — Production Deployment (Vercel + Render) (COMPLETE)
-Deployed Express/Node.js backend API on Render (devpostify-nova-api.onrender.com). Connected to MongoDB Atlas with production network binding. Deployed Next.js App Router frontend on Vercel (dev-postify-nova.vercel.app).
-
-Milestone 19 — Final Hardening, Accessibility, Security & Release Freeze (COMPLETE)
-Real Syntax Highlighting: Integrated prismjs tokenization pipeline supporting JS, TS, TSX, JSON, Bash, Python, Markdown, CSS, and SQL with clipboard copy.
-
-Search Security: Sanitized /api/search using escapeRegex and a 100-character input cap to neutralize ReDoS attack vectors.
-
-Validation Consistency: Enforced identical 160-character post title limits and locked category schemas across client inputs and Zod validators.
-
-Mobile Responsive Drawer: Built a full off-canvas navigation drawer with backdrop blur, scroll locks, and escape-key handling.
-
-Semantic HTML & a11y: Standardized layouts, feed, bookmarks, post cards, author profile, and settings into HTML5 semantic landmarks (<main>, <header>, <article>, <nav>, <section>, <dl>).
-
-Production Hardening: Enforced SameSite=None; Secure; path=/ cookies, sanitized /api/health probes against environment leaks, eliminated any types, and pruned boilerplate artifacts.
-
-11. CURRENT POSITION
-Current State
-All Milestones (1–19) are 100% COMPLETE, SURGICALLY HARDENED, AUDITED, VERIFIED, and LIVE IN PRODUCTION.
-
-Frontend App: https://dev-postify-nova.vercel.app
-
-Backend API: https://devpostify-nova-api.onrender.com
-
-Health Check: https://devpostify-nova-api.onrender.com/api/health
-
-V1 Scope Status: FROZEN & SIGNED OFF
-
-12. FUTURE ROADMAP (POST-V1 / V2 CANDIDATES)
-The following features are strictly deferred to future iterations and are outside V1 scope:
-
-Nested comment threads on engineering posts
-
-Clap / Upvote technical reaction system
-
-Author follow / following graph
-
-In-app notification feed for author activity
-
-Syntax-highlighted code snippet sharing playground
-
-GitHub OAuth integration & repository cards
-```
+# 7. ARCHITECTURE & DATABASE COLLECTIONS
+
+- `users`: Credentials, bio, avatar, skills, specialties, socials
+- `posts`: Content, category, tags, coverImage, isDraft, reactionsCount, commentsCount, author
+- `bookmarks`: User and post references (unique compound index)
+- `reactions`: User and post references (unique compound index for idempotency)
+- `comments`: Post, author, content (indexed `{ post: 1, createdAt: -1 }`)
+- `notifications`: Recipient, sender, type (`reaction` | `comment`), post, isRead
+
+---
+
+# 8. REST API SPECIFICATION
+
+- **Auth**: `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
+- **Posts**: `GET /api/posts` (`?sort=`, `?category=`, `?tag=`), `GET /api/posts/:id`, `POST /api/posts`, `PATCH /api/posts/:id`, `DELETE /api/posts/:id`
+- **Reactions**: `POST /api/posts/:id/react`, `GET /api/posts/:id/react`
+- **Comments**: `GET /api/posts/:id/comments`, `POST /api/posts/:id/comments`, `DELETE /api/comments/:commentId`
+- **Profile**: `GET /api/profile/:username`, `PATCH /api/profile`
+- **Notifications**: `GET /api/notifications`, `GET /api/notifications/unread-count`, `PATCH /api/notifications/read-all`, `PATCH /api/notifications/:id/read`
+- **Upload**: `POST /api/upload/signature`
+- **Bookmarks**: `GET /api/bookmarks`, `POST /api/bookmarks/:postId`, `DELETE /api/bookmarks/:postId`
+- **System**: `GET /api/search`, `GET /api/health`
+
+---
+
+# 9. COMPLETED MILESTONES (1–26)
+
+- **Milestones 1–19**: Core V1 platform complete, hardened, and frozen.
+- **Milestone 20 — Database Schemas & V1.1 Models Setup (COMPLETE)**: Extended User and Post models; created Reaction, Comment, and Notification models with compound unique indexing.
+- **Milestone 21 — Media Upload Pipeline (COMPLETE)**: Cloudinary signed direct upload endpoint and frontend upload utility.
+- **Milestone 22 — Enhanced Developer Identity (COMPLETE)**: Avatar upload, tech stack skills, specialties, socials, and profile overhaul with custom SVG social icons.
+- **Milestone 23 — Post Reactions Engine (COMPLETE)**: Idempotent toggle reactions, atomic counters, and optimistic UI button.
+- **Milestone 24 — Technical Discussion System (COMPLETE)**: Flat comments API, post author notification trigger, and optimistic comment section with author deletion.
+- **Milestone 25 — Enhanced Discovery & Drafting (COMPLETE)**: Feed sort bar (Latest vs Top Insights), tag filtering, cover image rendering, and draft persistence.
+- **Milestone 26 — Notification Center (COMPLETE)**: Persisted alert pipeline, Navbar bell badge with unread count polling, and `/notifications` activity feed.
+
+---
+
+# 10. CURRENT POSITION & NEXT STEPS
+
+- **Current State**: Milestones 1–26 are 100% COMPLETE, VERIFIED, and PASSING BUILDS.
+- **Remaining for V1.1 Completion**:
+  - **Milestone 27**: Full Integration, Edit Post Cover/Draft sync, Mobile Drawer audit, and V1.1 Production Release.
