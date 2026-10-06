@@ -1,236 +1,279 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import React, { useEffect, useState, use } from "react";
 import Link from "next/link";
-import { api, ApiError } from "@/lib/api";
-import { ProfileResponseData, ProfileUser } from "@/types/profile";
-import { Post } from "@/types/post";
-import { useAuth } from "@/context/AuthContext";
-import PostCard from "@/components/posts/PostCard";
-import PostSkeleton from "@/components/posts/PostSkeleton";
-import EmptyState from "@/components/ui/EmptyState";
-import EditProfileModal from "@/components/profile/EditProfileModal";
 import {
   Calendar,
-  PenTool,
-  ArrowLeft,
-  Settings,
-  AlertCircle,
-  FileCode2,
+  FileText,
+  Globe,
+  Edit3,
+  Layers,
+  Sparkles,
 } from "lucide-react";
+import { GithubIcon, LinkedinIcon } from "@/components/common/SocialIcons";
+import { api, ApiError } from "@/lib/api";
+import { User } from "@/types/auth";
+import { Post } from "@/types/post";
+import PostCard from "@/components/posts/PostCard";
+import EditProfileModal from "@/components/profile/EditProfileModal";
 
-export default function ProfilePage() {
-  const { username } = useParams();
-  const { user: currentUser } = useAuth();
+interface ProfileResponseData {
+  user: User;
+  posts: Post[];
+  postsCount: number;
+  isOwner: boolean;
+}
 
-  const [profileUser, setProfileUser] = useState<ProfileUser | null>(null);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export default function ProfilePage({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}) {
+  const resolvedParams = use(params);
+  const username = resolvedParams.username;
+
+  const [profileData, setProfileData] = useState<ProfileResponseData | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  /**
-   * Hydrates public profile metrics and author posts simultaneously.
-   */
-  useEffect(() => {
-    async function fetchProfile() {
-      if (!username) return;
-      try {
-        setIsLoading(true);
-        setError(null);
-        const res = await api.get<ProfileResponseData>(`/profile/${username}`);
-        const userData = res.data?.profile || res.data?.user;
-        if (userData) {
-          setProfileUser(userData);
-          setPosts(res.data?.posts || []);
-        } else {
-          setError("User not found");
-        }
-      } catch (err) {
-        if (err instanceof ApiError) {
-          setError(err.message);
-        } else {
-          setError("Failed to load user profile.");
-        }
-      } finally {
-        setIsLoading(false);
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await api.get<ProfileResponseData>(`/profile/${username}`);
+      if (res.data) {
+        setProfileData(res.data);
       }
-    }
-
-    fetchProfile();
-  }, [username]);
-
-  // Restrict profile mutations strictly to the authenticated account owner
-  const isOwner =
-    currentUser && profileUser && currentUser.username === profileUser.username;
-
-  const handleProfileUpdated = (updatedName: string, updatedBio: string) => {
-    if (profileUser) {
-      setProfileUser({
-        ...profileUser,
-        name: updatedName,
-        bio: updatedBio,
-      });
+    } catch (err: unknown) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError("Failed to load developer profile");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (isLoading) {
+  useEffect(() => {
+    fetchProfile();
+  }, [username]);
+
+  if (loading) {
     return (
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-        <div className="card-surface p-8 mb-8 animate-pulse space-y-4">
-          <div className="flex items-center gap-4">
-            <div className="h-20 w-20 rounded-full bg-slate-800" />
-            <div className="space-y-2">
-              <div className="h-5 w-40 rounded bg-slate-800" />
-              <div className="h-3 w-24 rounded bg-slate-850" />
-            </div>
-          </div>
-          <div className="h-4 w-3/4 rounded bg-slate-800" />
-        </div>
+      <main className="max-w-4xl mx-auto px-4 py-8 animate-pulse">
+        <div className="card-surface h-64 mb-8 bg-slate-900/40 rounded-2xl border border-slate-800" />
         <div className="space-y-4">
-          <PostSkeleton />
-          <PostSkeleton />
+          <div className="h-32 bg-slate-900/40 rounded-2xl border border-slate-800" />
+          <div className="h-32 bg-slate-900/40 rounded-2xl border border-slate-800" />
         </div>
       </main>
     );
   }
 
-  if (error || !profileUser) {
+  if (error || !profileData) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-12">
-        <div role="alert" className="card-surface p-8 text-center">
-          <AlertCircle className="mx-auto mb-3 h-8 w-8 text-red-400" />
-          <h2 className="font-heading text-lg font-semibold text-slate-200">
-            {error || "User not found"}
-          </h2>
-          <Link
-            href="/"
-            className="btn-primary mt-5 inline-flex px-4 py-2 text-xs"
-          >
-            Return to Feed
+      <main className="max-w-4xl mx-auto px-4 py-16 text-center">
+        <div className="card-surface p-8 border border-slate-800 bg-slate-900/60 rounded-2xl max-w-md mx-auto">
+          <h1 className="text-xl font-bold text-slate-100 mb-2">
+            Developer Not Found
+          </h1>
+          <p className="text-xs text-slate-400 mb-6">
+            {error ||
+              "The developer profile you are looking for does not exist."}
+          </p>
+          <Link href="/" className="btn-primary px-4 py-2 text-xs font-medium">
+            Back to Feed
           </Link>
         </div>
       </main>
     );
   }
 
-  const joinDate = new Date(profileUser.createdAt).toLocaleDateString("en-US", {
+  const { user, posts, postsCount, isOwner } = profileData;
+  const formattedDate = new Date(user.createdAt).toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
   });
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      {/* Navigation Breadcrumb */}
-      <nav aria-label="Breadcrumb" className="mb-6">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-400 transition hover:text-slate-200"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to feed
-        </Link>
-      </nav>
-
-      {/* Developer Profile Header Card */}
-      <header className="card-surface p-6 sm:p-8 mb-8 shadow-2xl">
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
-            {/* Avatar Badge */}
-            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-linear-to-br from-blue-600 to-purple-600 text-2xl font-bold font-heading text-white shadow-xl shadow-blue-500/10 border border-white/10">
-              {profileUser.name
-                ? profileUser.name.charAt(0).toUpperCase()
-                : "D"}
+    <main className="max-w-4xl mx-auto px-4 py-8">
+      {/* Developer Hero Card */}
+      <section className="card-surface p-6 sm:p-8 rounded-2xl border border-slate-800 bg-slate-900/80 mb-8 relative">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <div className="w-20 h-20 rounded-2xl border border-slate-700 bg-slate-800 flex items-center justify-center text-2xl font-bold text-blue-400 overflow-hidden shrink-0 shadow-lg">
+              {user.avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                user.name.charAt(0).toUpperCase()
+              )}
             </div>
 
             <div>
-              <h1 className="font-heading text-2xl font-bold text-slate-100">
-                {profileUser.name}
-              </h1>
-              <p className="font-mono text-xs text-slate-400 mt-0.5">
-                @{profileUser.username}
-              </p>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold text-slate-100">
+                  {user.name}
+                </h1>
+                <span className="text-xs text-slate-400 font-mono">
+                  @{user.username}
+                </span>
+              </div>
 
-              {profileUser.bio ? (
-                <p className="text-xs sm:text-sm text-slate-300 mt-3 max-w-xl leading-relaxed">
-                  {profileUser.bio}
+              {user.bio ? (
+                <p className="text-xs text-slate-300 mt-2 max-w-xl leading-relaxed">
+                  {user.bio}
                 </p>
               ) : (
-                <p className="text-xs text-slate-500 italic mt-3">
-                  No bio provided yet.
+                <p className="text-xs text-slate-500 italic mt-1">
+                  Developer on DevPostify.
                 </p>
               )}
 
-              {/* Developer Metadata Attributes */}
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-4 text-xs font-mono text-slate-400">
+              <div className="flex flex-wrap items-center gap-4 mt-3 text-[11px] text-slate-400 font-mono">
                 <span className="inline-flex items-center gap-1.5">
-                  <Calendar className="h-3.5 w-3.5 text-slate-500" />
-                  Joined {joinDate}
+                  <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                  Joined {formattedDate}
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <FileCode2 className="h-3.5 w-3.5 text-blue-400" />
-                  {posts.length} {posts.length === 1 ? "Post" : "Posts"}{" "}
-                  published
+                  <FileText className="w-3.5 h-3.5 text-purple-400" />
+                  {postsCount} {postsCount === 1 ? "Post" : "Posts"}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Owner-Only Account Configuration Actions */}
-          {isOwner && (
-            <button
-              onClick={() => setIsEditModalOpen(true)}
-              aria-label="Edit personal profile"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-700 bg-slate-900/80 px-4 py-2 text-xs font-medium text-slate-200 hover:border-slate-600 hover:bg-slate-800 transition self-center sm:self-start shrink-0"
-            >
-              <Settings className="h-3.5 w-3.5 text-slate-400" />
-              Edit Profile
-            </button>
-          )}
-        </div>
-      </header>
+          {/* Owner Edit Action & Social Links */}
+          <div className="flex flex-col items-start sm:items-end gap-3 w-full sm:w-auto">
+            {isOwner && (
+              <button
+                type="button"
+                onClick={() => setIsEditModalOpen(true)}
+                className="btn-primary px-4 py-2 text-xs font-medium inline-flex items-center gap-2 w-full sm:w-auto"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                Edit Profile
+              </button>
+            )}
 
-      {/* Author Engineering Articles Section */}
-      <section aria-labelledby="published-articles-heading">
-        <div className="flex items-center justify-between mb-4 border-b border-slate-800/80 pb-3">
-          <h2
-            id="published-articles-heading"
-            className="font-heading text-sm font-semibold text-slate-200 uppercase tracking-wider flex items-center gap-2"
-          >
-            <PenTool className="h-4 w-4 text-blue-400" />
-            Published Articles ({posts.length})
-          </h2>
+            <div className="flex items-center gap-2">
+              {user.socials?.github && (
+                <a
+                  href={user.socials.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="GitHub Profile"
+                  className="p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white hover:border-slate-700 transition"
+                >
+                  <GithubIcon className="w-4 h-4" />
+                </a>
+              )}
+              {user.socials?.linkedin && (
+                <a
+                  href={user.socials.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="LinkedIn Profile"
+                  className="p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white hover:border-slate-700 transition"
+                >
+                  <LinkedinIcon className="w-4 h-4" />
+                </a>
+              )}
+              {user.socials?.website && (
+                <a
+                  href={user.socials.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Portfolio Website"
+                  className="p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white hover:border-slate-700 transition"
+                >
+                  <Globe className="w-4 h-4" />
+                </a>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="space-y-4">
-          {posts.length > 0 ? (
-            posts.map((post) => <PostCard key={post._id} post={post} />)
-          ) : (
-            <EmptyState
-              title="No posts published yet"
-              description={
-                isOwner
-                  ? "You haven't written any engineering posts yet. Share your first breakthrough!"
-                  : `@${profileUser.username} hasn't published any posts yet.`
-              }
-              actionText={isOwner ? "Write First Post" : undefined}
-              actionHref={isOwner ? "/create" : undefined}
-            />
-          )}
-        </div>
+        {/* Technical Specialties & Skills Showcase */}
+        {((user.specialties && user.specialties.length > 0) ||
+          (user.skills && user.skills.length > 0)) && (
+          <div className="mt-6 pt-6 border-t border-slate-800/80 space-y-3">
+            {user.specialties && user.specialties.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-purple-400 font-mono uppercase tracking-wider mr-1">
+                  <Sparkles className="w-3 h-3" /> Specialties:
+                </span>
+                {user.specialties.map((specialty, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2.5 py-0.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-[11px] font-medium"
+                  >
+                    {specialty}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {user.skills && user.skills.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-400 font-mono uppercase tracking-wider mr-1">
+                  <Layers className="w-3 h-3" /> Tech Stack:
+                </span>
+                {user.skills.map((skill, idx) => (
+                  <span
+                    key={idx}
+                    className="px-2 py-0.5 rounded-lg border border-slate-800 bg-slate-950 text-slate-300 text-[11px] font-mono"
+                  >
+                    #{skill}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
-      {/* Modal for Modifying User Profile Metadata */}
-      {isOwner && (
-        <EditProfileModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          initialName={profileUser.name}
-          initialBio={profileUser.bio || ""}
-          onProfileUpdated={handleProfileUpdated}
-        />
-      )}
+      {/* Publications / Posts Section */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-slate-100">
+            {isOwner ? "Your Publications" : `Articles by ${user.name}`}
+          </h2>
+          <span className="text-xs text-slate-500 font-mono">
+            {posts.length} {posts.length === 1 ? "article" : "articles"}
+          </span>
+        </div>
+
+        {posts.length === 0 ? (
+          <div className="card-surface p-10 text-center rounded-2xl border border-slate-800 bg-slate-900/40">
+            <p className="text-xs text-slate-400">
+              No technical posts published yet.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {posts.map((post) => (
+              <PostCard key={post._id} post={post} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        user={user}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSuccess={fetchProfile}
+      />
     </main>
   );
 }

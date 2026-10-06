@@ -1,46 +1,73 @@
-import { Request, Response } from "express";
-import { asyncHandler } from "../utils/asyncHandler";
-import { UserModel } from "../models/User";
-import { PostModel } from "../models/Post";
-import { updateProfileSchema } from "../validators/profile.validator";
+import type { Request, Response } from "express";
+import { UserModel } from "../models/User.js";
+import { PostModel } from "../models/Post.js";
+import { updateProfileSchema } from "../validators/profile.validator.js";
+import { sendSuccess } from "../utils/apiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
+// @desc    Get public developer profile with their posts
+// @route   GET /api/profile/:username
+// @access  Public
 export const getProfile = asyncHandler(async (req: Request, res: Response) => {
   const { username } = req.params;
 
   if (typeof username !== "string" || !username.trim()) {
     return res.status(400).json({
       success: false,
-      message: "Username is required",
+      message: "Valid username parameter is required",
     });
   }
 
+  const cleanUsername = username.toLowerCase().trim();
+
   const user = await UserModel.findOne({
-    username: username.toLowerCase(),
+    username: cleanUsername,
   }).select("-password");
 
   if (!user) {
     return res.status(404).json({
       success: false,
-      message: "Profile not found",
+      message: "Developer profile not found",
     });
   }
 
-  const posts = await PostModel.find({
+  // Only the owner can see their own drafts; public sees only published posts
+  const isOwner = req.userId === user._id.toString();
+  const postFilter: { author: typeof user._id; isDraft?: boolean } = {
     author: user._id,
-  })
+  };
+
+  if (!isOwner) {
+    postFilter.isDraft = false;
+  }
+
+  const posts = await PostModel.find(postFilter)
     .sort({ createdAt: -1 })
-    .populate("author", "username name avatar")
+    .populate("author", "name username avatar")
     .lean();
 
-  return res.status(200).json({
-    success: true,
-    data: {
-      profile: user,
-      posts,
+  return sendSuccess(res, 200, "Profile fetched successfully", {
+    user: {
+      _id: user._id,
+      id: user._id,
+      username: user.username,
+      name: user.name,
+      bio: user.bio || "",
+      avatar: user.avatar || "",
+      skills: user.skills || [],
+      specialties: user.specialties || [],
+      socials: user.socials || { github: "", linkedin: "", website: "" },
+      createdAt: user.createdAt,
     },
+    posts,
+    postsCount: posts.length,
+    isOwner,
   });
 });
 
+// @desc    Update authenticated user's profile
+// @route   PATCH /api/profile
+// @access  Private
 export const updateProfile = asyncHandler(
   async (req: Request, res: Response) => {
     if (!req.userId) {
@@ -50,37 +77,49 @@ export const updateProfile = asyncHandler(
       });
     }
 
-    const result = updateProfileSchema.safeParse(req.body);
+    const parseResult = updateProfileSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      const firstErrorMessage =
+        parseResult.error.issues?.[0]?.message || "Validation failed";
 
-    if (!result.success) {
       return res.status(400).json({
         success: false,
-        message: "Validation failed",
-        errors: result.error.flatten().fieldErrors,
+        message: firstErrorMessage,
+        errors: parseResult.error.flatten().fieldErrors,
       });
     }
 
-    const user = await UserModel.findByIdAndUpdate(
+    const updateData = parseResult.data;
+
+    const updatedUser = await UserModel.findByIdAndUpdate(
       req.userId,
-      { $set: result.data },
-      {
-        new: true,
-        runValidators: true,
-      },
+      { $set: updateData },
+      { new: true, runValidators: true },
     ).select("-password");
 
-    if (!user) {
+    if (!updatedUser) {
       return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Profile updated successfully",
-      data: {
-        profile: user,
+    return sendSuccess(res, 200, "Profile updated successfully", {
+      user: {
+        _id: updatedUser._id,
+        id: updatedUser._id,
+        username: updatedUser.username,
+        name: updatedUser.name,
+        bio: updatedUser.bio || "",
+        avatar: updatedUser.avatar || "",
+        skills: updatedUser.skills || [],
+        specialties: updatedUser.specialties || [],
+        socials: updatedUser.socials || {
+          github: "",
+          linkedin: "",
+          website: "",
+        },
+        createdAt: updatedUser.createdAt,
       },
     });
   },

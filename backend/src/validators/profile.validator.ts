@@ -1,24 +1,40 @@
-import z from "zod";
+import { z } from "zod";
+
+const optionalUrl = z
+  .string()
+  .trim()
+  .refine(
+    (val) => val === "" || /^https?:\/\/.+/i.test(val),
+    "Must be a valid URL starting with http:// or https://",
+  )
+  .optional();
 
 export const updateProfileSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(2, "Name must be at least 2 characters")
-    .max(80, "Name cannot exceed 80 characters")
+    .min(1, "Name cannot be empty")
+    .max(60, "Name cannot exceed 60 characters")
     .optional(),
-
   bio: z
     .string()
     .trim()
-    .max(500, "Bio cannot exceed 500 characters")
+    .max(300, "Bio cannot exceed 300 characters")
     .optional(),
-
-  avatar: z
-    .string()
-    .url("Avatar must be a valid URL")
-    .optional()
-    .or(z.literal("")),
+  avatar: optionalUrl,
+  skills: z
+    .array(z.string().trim().max(25, "Skill name too long"))
+    .max(15, "You can add up to 15 skills")
+    .optional(),
+  specialties: z
+    .array(z.string().trim().max(30, "Specialty name too long"))
+    .max(5, "You can add up to 5 specialties")
+    .optional(),
+  socials: z
+    .object({
+      github: optionalUrl,
+      linkedin: optionalUrl,
+      website: optionalUrl,
+    })
+    .optional(),
 });
-
-export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
