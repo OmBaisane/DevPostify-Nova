@@ -9,7 +9,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 // @desc    Get comments for a specific post
 // @route   GET /api/posts/:id/comments
-// @access  Public
+// @access  Public (Auth-aware)
 export const getComments = asyncHandler(async (req: Request, res: Response) => {
   const { id: postId } = req.params;
 
@@ -17,6 +17,23 @@ export const getComments = asyncHandler(async (req: Request, res: Response) => {
     return res.status(400).json({
       success: false,
       message: "Valid post ID is required",
+    });
+  }
+
+  // 1. Verify post exists and enforce draft boundary
+  const post = await PostModel.findById(postId).select("isDraft author");
+  if (!post) {
+    return res.status(404).json({
+      success: false,
+      message: "Post not found",
+    });
+  }
+
+  // If post is a draft, only the author can view discussion
+  if (post.isDraft && (!req.userId || req.userId !== post.author.toString())) {
+    return res.status(404).json({
+      success: false,
+      message: "Post not found",
     });
   }
 
@@ -72,6 +89,14 @@ export const createComment = asyncHandler(
       });
     }
 
+    // Draft boundary: Nobody (not even readers) can comment on unpublished draft posts
+    if (post.isDraft) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot comment on an unpublished draft",
+      });
+    }
+
     // 1. Create comment
     const comment = await CommentModel.create({
       post: postId,
@@ -82,7 +107,7 @@ export const createComment = asyncHandler(
     // 2. Increment post commentsCount atomically
     await PostModel.findByIdAndUpdate(postId, { $inc: { commentsCount: 1 } });
 
-    // 3. Populate author metadata for immediate frontend response
+    // 3. Populate author metadata for frontend response
     const populatedComment = await CommentModel.findById(comment._id)
       .populate("author", "name username avatar")
       .lean();
@@ -137,7 +162,6 @@ export const deleteComment = asyncHandler(
       });
     }
 
-    // Ownership verification: Only comment creator can delete
     if (comment.author.toString() !== userId) {
       return res.status(403).json({
         success: false,
@@ -147,10 +171,7 @@ export const deleteComment = asyncHandler(
 
     const postId = comment.post;
 
-    // 1. Delete comment
     await CommentModel.findByIdAndDelete(commentId);
-
-    // 2. Decrement post commentsCount atomically
     await PostModel.findByIdAndUpdate(postId, { $inc: { commentsCount: -1 } });
 
     return sendSuccess(res, 200, "Comment deleted successfully");

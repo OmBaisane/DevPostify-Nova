@@ -24,7 +24,9 @@ export const searchPosts = asyncHandler(async (req: Request, res: Response) => {
   // Safe escaped regex pattern for fuzzy token search
   const safeRegex = new RegExp(escapeRegex(sanitizedQuery), "i");
 
+  // STRICT PRIVACY: Private drafts must NEVER appear in public search results
   const posts = await PostModel.find({
+    isDraft: { $ne: true },
     $or: [
       { title: safeRegex },
       { content: safeRegex },

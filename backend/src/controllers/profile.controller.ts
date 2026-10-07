@@ -7,7 +7,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 // @desc    Get public developer profile with their posts
 // @route   GET /api/profile/:username
-// @access  Public
+// @access  Public (Auth-aware via optionalAuth)
 export const getProfile = asyncHandler(async (req: Request, res: Response) => {
   const { username } = req.params;
 
@@ -31,14 +31,15 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
-  // Only the owner can see their own drafts; public sees only published posts
-  const isOwner = req.userId === user._id.toString();
-  const postFilter: { author: typeof user._id; isDraft?: boolean } = {
+  // If viewer is the owner, include all posts; if public, strictly exclude drafts
+  const isOwner = Boolean(req.userId && req.userId === user._id.toString());
+
+  const postFilter: Record<string, unknown> = {
     author: user._id,
   };
 
   if (!isOwner) {
-    postFilter.isDraft = false;
+    postFilter.isDraft = { $ne: true };
   }
 
   const posts = await PostModel.find(postFilter)

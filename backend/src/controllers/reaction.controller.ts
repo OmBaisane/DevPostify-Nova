@@ -39,16 +39,22 @@ export const toggleReaction = asyncHandler(
       });
     }
 
+    // Draft boundary: Reactions are prohibited on unpublished drafts
+    if (post.isDraft) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot react to an unpublished draft",
+      });
+    }
+
     const existingReaction = await ReactionModel.findOne({
       user: userId,
       post: postId,
     });
 
     if (existingReaction) {
-      // 1. Remove reaction
       await ReactionModel.findByIdAndDelete(existingReaction._id);
 
-      // 2. Decrement post reactionsCount atomically
       const updatedPost = await PostModel.findByIdAndUpdate(
         postId,
         { $inc: { reactionsCount: -1 } },
@@ -63,21 +69,18 @@ export const toggleReaction = asyncHandler(
       });
     }
 
-    // 1. Create reaction record
     await ReactionModel.create({
       user: userId,
       post: postId,
       type: "like",
     });
 
-    // 2. Increment post reactionsCount atomically
     const updatedPost = await PostModel.findByIdAndUpdate(
       postId,
       { $inc: { reactionsCount: 1 } },
       { new: true },
     );
 
-    // 3. Create notification for post author (skip if reacting to own post)
     if (post.author.toString() !== userId) {
       await NotificationModel.create({
         recipient: post.author,
@@ -96,7 +99,7 @@ export const toggleReaction = asyncHandler(
 
 // @desc    Get current user's reaction status and count
 // @route   GET /api/posts/:id/react
-// @access  Public (Optional Auth)
+// @access  Public (Auth-aware)
 export const getReactionStatus = asyncHandler(
   async (req: Request, res: Response) => {
     const { id: postId } = req.params;
@@ -112,8 +115,18 @@ export const getReactionStatus = asyncHandler(
       });
     }
 
-    const post = await PostModel.findById(postId).select("reactionsCount");
+    const post = await PostModel.findById(postId).select(
+      "reactionsCount isDraft author",
+    );
     if (!post) {
+      return res.status(404).json({
+        success: false,
+        message: "Post not found",
+      });
+    }
+
+    // Draft privacy: If draft, hide unless owner
+    if (post.isDraft && (!userId || userId !== post.author.toString())) {
       return res.status(404).json({
         success: false,
         message: "Post not found",

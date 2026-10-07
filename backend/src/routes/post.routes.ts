@@ -23,7 +23,7 @@ const router = Router();
 router.get("/", optionalAuth, getPosts);
 router.get("/:id", optionalAuth, getPostById);
 router.get("/:id/react", optionalAuth, getReactionStatus);
-router.get("/:id/comments", getComments);
+router.get("/:id/comments", optionalAuth, getComments);
 
 // Strictly protected mutation routes
 router.post("/", requireAuth, createPost);
