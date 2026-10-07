@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createPost,
   deletePost,
+  getMyDrafts,
   getPostById,
   getPosts,
   updatePost,
@@ -31,5 +32,8 @@ router.patch("/:id", requireAuth, updatePost);
 router.delete("/:id", requireAuth, deletePost);
 router.post("/:id/react", requireAuth, toggleReaction);
 router.post("/:id/comments", requireAuth, createComment);
+
+// Protected drafts route (/api/posts/my/drafts)
+router.get("/my/drafts", requireAuth, getMyDrafts);
 
 export default router;

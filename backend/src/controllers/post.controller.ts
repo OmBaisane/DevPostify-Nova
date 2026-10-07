@@ -308,3 +308,30 @@ export const deletePost = asyncHandler(async (req: Request, res: Response) => {
 
   return sendSuccess(res, 200, "Post deleted successfully");
 });
+
+// @desc    Get current user's private drafts
+// @route   GET /api/posts/my/drafts
+// @access  Private
+export const getMyDrafts = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.userId;
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Authentication required",
+    });
+  }
+
+  const drafts = await PostModel.find({
+    author: userId,
+    isDraft: true,
+  })
+    .sort({ updatedAt: -1 })
+    .populate("author", "name username avatar")
+    .lean();
+
+  return sendSuccess(res, 200, "Drafts fetched successfully", {
+    drafts,
+    total: drafts.length,
+  });
+});

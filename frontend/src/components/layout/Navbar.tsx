@@ -17,6 +17,7 @@ import {
   X,
   Bell,
   Compass,
+  FileEdit,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -121,6 +122,15 @@ export default function Navbar() {
                 >
                   <PenSquare className="h-3.5 w-3.5" />
                   Write Post
+                </Link>
+
+                <Link
+                  href="/drafts"
+                  className="inline-flex items-center justify-center h-9 w-9 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-300 hover:text-white hover:border-slate-700 transition"
+                  title="My Drafts"
+                  aria-label="My Drafts"
+                >
+                  <FileEdit className="h-4 w-4 text-amber-400/90" />
                 </Link>
 
                 <Link
@@ -278,6 +288,14 @@ export default function Navbar() {
                   >
                     <Compass className="h-4 w-4 text-blue-400" />
                     <span>Explore Feed</span>
+                  </Link>
+
+                  <Link
+                    href="/drafts"
+                    className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium text-slate-300 hover:bg-slate-900 hover:text-white transition"
+                  >
+                    <FileEdit className="h-4 w-4 text-amber-400" />
+                    <span>My Drafts</span>
                   </Link>
 
                   <Link
