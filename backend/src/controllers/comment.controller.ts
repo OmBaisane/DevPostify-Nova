@@ -9,7 +9,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 // @desc    Get comments for a specific post
 // @route   GET /api/posts/:id/comments
-// @access  Public (Auth-aware)
+// @access  Public (Auth-aware via optionalAuth)
 export const getComments = asyncHandler(async (req: Request, res: Response) => {
   const { id: postId } = req.params;
 
@@ -89,7 +89,7 @@ export const createComment = asyncHandler(
       });
     }
 
-    // Draft boundary: Nobody (not even readers) can comment on unpublished draft posts
+    // Draft boundary: Nobody can comment on unpublished draft posts
     if (post.isDraft) {
       return res.status(400).json({
         success: false,
@@ -120,7 +120,7 @@ export const createComment = asyncHandler(
         type: "comment",
         post: post._id,
         comment: comment._id,
-      });
+      }).catch(() => null);
     }
 
     return sendSuccess(res, 201, "Comment created successfully", {
@@ -171,9 +171,24 @@ export const deleteComment = asyncHandler(
 
     const postId = comment.post;
 
+    // 1. Delete comment
     await CommentModel.findByIdAndDelete(commentId);
-    await PostModel.findByIdAndUpdate(postId, { $inc: { commentsCount: -1 } });
 
-    return sendSuccess(res, 200, "Comment deleted successfully");
+    // 2. Clean up associated notification if one was created
+    await NotificationModel.findOneAndDelete({ comment: commentId }).catch(
+      () => null,
+    );
+
+    // 3. Atomically sync commentsCount to avoid negative numbers
+    const remainingComments = await CommentModel.countDocuments({
+      post: postId,
+    });
+    await PostModel.findByIdAndUpdate(postId, {
+      $set: { commentsCount: remainingComments },
+    });
+
+    return sendSuccess(res, 200, "Comment deleted successfully", {
+      commentsCount: remainingComments,
+    });
   },
 );

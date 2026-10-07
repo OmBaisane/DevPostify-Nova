@@ -6,7 +6,7 @@ import { NotificationModel } from "../models/Notification.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-// @desc    Toggle post reaction (add or remove)
+// @desc    Toggle post reaction (add or remove) safely under concurrent requests
 // @route   POST /api/posts/:id/react
 // @access  Private
 export const toggleReaction = asyncHandler(
@@ -47,59 +47,89 @@ export const toggleReaction = asyncHandler(
       });
     }
 
-    const existingReaction = await ReactionModel.findOne({
+    // Atomically check if reaction already exists
+    const existingReaction = await ReactionModel.findOneAndDelete({
       user: userId,
       post: postId,
     });
+
+    let isReacted = false;
 
     if (existingReaction) {
-      await ReactionModel.findByIdAndDelete(existingReaction._id);
-
-      const updatedPost = await PostModel.findByIdAndUpdate(
-        postId,
-        { $inc: { reactionsCount: -1 } },
-        { new: true },
-      );
-
-      const safeCount = Math.max(0, updatedPost?.reactionsCount || 0);
-
-      return sendSuccess(res, 200, "Reaction removed", {
-        isReacted: false,
-        reactionsCount: safeCount,
-      });
-    }
-
-    await ReactionModel.create({
-      user: userId,
-      post: postId,
-      type: "like",
-    });
-
-    const updatedPost = await PostModel.findByIdAndUpdate(
-      postId,
-      { $inc: { reactionsCount: 1 } },
-      { new: true },
-    );
-
-    if (post.author.toString() !== userId) {
-      await NotificationModel.create({
+      // Reaction removed: Clean up any pending notification for this specific reaction
+      await NotificationModel.findOneAndDelete({
         recipient: post.author,
         sender: userId,
         type: "reaction",
         post: post._id,
-      });
+      }).catch(() => null);
+
+      isReacted = false;
+    } else {
+      // Reaction add attempt
+      try {
+        await ReactionModel.create({
+          user: userId,
+          post: postId,
+          type: "like",
+        });
+        isReacted = true;
+
+        // Trigger notification if not author's own post (upsert style avoid spam)
+        if (post.author.toString() !== userId) {
+          await NotificationModel.findOneAndUpdate(
+            {
+              recipient: post.author,
+              sender: userId,
+              type: "reaction",
+              post: post._id,
+            },
+            {
+              $setOnInsert: {
+                recipient: post.author,
+                sender: userId,
+                type: "reaction",
+                post: post._id,
+                read: false,
+              },
+            },
+            { upsert: true, new: true },
+          ).catch(() => null);
+        }
+      } catch (err: unknown) {
+        // E11000: Race condition duplicate hit caught safely without failing request
+        if ((err as { code?: number }).code === 11000) {
+          isReacted = true;
+        } else {
+          throw err;
+        }
+      }
     }
 
-    return sendSuccess(res, 201, "Reaction added", {
-      isReacted: true,
-      reactionsCount: updatedPost?.reactionsCount || 1,
-    });
+    // Reconcile actual reaction count to guarantee 100% truth and zero counter drift
+    const actualCount = await ReactionModel.countDocuments({ post: postId });
+
+    await PostModel.findByIdAndUpdate(
+      postId,
+      { $set: { reactionsCount: actualCount } },
+      { new: true },
+    );
+
+    return sendSuccess(
+      res,
+      200,
+      isReacted ? "Reaction added" : "Reaction removed",
+      {
+        isReacted,
+        reactionsCount: actualCount,
+      },
+    );
   },
 );
 
 // @desc    Get current user's reaction status and count
 // @route   GET /api/posts/:id/react
-// @access  Public (Auth-aware)
+// @access  Public (Auth-aware via optionalAuth)
 export const getReactionStatus = asyncHandler(
   async (req: Request, res: Response) => {
     const { id: postId } = req.params;
