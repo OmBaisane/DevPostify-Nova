@@ -3,6 +3,8 @@ import mongoose from "mongoose";
 import { PostModel } from "../models/Post.js";
 import { ReactionModel } from "../models/Reaction.js";
 import { BookmarkModel } from "../models/Bookmark.js";
+import { CommentModel } from "../models/Comment.js";
+import { NotificationModel } from "../models/Notification.js";
 import {
   createPostSchema,
   updatePostSchema,
@@ -16,7 +18,7 @@ function sanitizeSearchQuery(query: string): string {
 
 // @desc    Get all public posts with filtering, sorting, and tag support
 // @route   GET /api/posts
-// @access  Public
+// @access  Public (Auth-aware via optionalAuth)
 export const getPosts = asyncHandler(async (req: Request, res: Response) => {
   const { category, search, tag, sort = "latest" } = req.query;
   const page = Math.max(1, parseInt(req.query.page as string) || 1);
@@ -95,7 +97,7 @@ export const getPosts = asyncHandler(async (req: Request, res: Response) => {
 
 // @desc    Get single post by ID
 // @route   GET /api/posts/:id
-// @access  Public
+// @access  Public (Auth-aware via optionalAuth)
 export const getPostById = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
 
@@ -142,6 +144,33 @@ export const getPostById = asyncHandler(async (req: Request, res: Response) => {
       ...post,
       isReactedByMe,
     },
+  });
+});
+
+// @desc    Get current user's private drafts
+// @route   GET /api/posts/my/drafts
+// @access  Private
+export const getMyDrafts = asyncHandler(async (req: Request, res: Response) => {
+  const userId = req.userId;
+
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Authentication required",
+    });
+  }
+
+  const drafts = await PostModel.find({
+    author: userId,
+    isDraft: true,
+  })
+    .sort({ updatedAt: -1 })
+    .populate("author", "name username avatar")
+    .lean();
+
+  return sendSuccess(res, 200, "Drafts fetched successfully", {
+    drafts,
+    total: drafts.length,
   });
 });
 
@@ -264,7 +293,7 @@ export const updatePost = asyncHandler(async (req: Request, res: Response) => {
   });
 });
 
-// @desc    Delete post
+// @desc    Delete post and cascade cleanup all dependent records
 // @route   DELETE /api/posts/:id
 // @access  Private
 export const deletePost = asyncHandler(async (req: Request, res: Response) => {
@@ -300,38 +329,33 @@ export const deletePost = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
-  await Promise.all([
-    PostModel.findByIdAndDelete(id),
-    BookmarkModel.deleteMany({ post: id }),
-    ReactionModel.deleteMany({ post: id }),
-  ]);
+  // Use MongoDB session transaction for atomic cascading deletion
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
 
-  return sendSuccess(res, 200, "Post deleted successfully");
-});
+    // 1. Delete post document
+    await PostModel.findByIdAndDelete(id, { session });
 
-// @desc    Get current user's private drafts
-// @route   GET /api/posts/my/drafts
-// @access  Private
-export const getMyDrafts = asyncHandler(async (req: Request, res: Response) => {
-  const userId = req.userId;
+    // 2. Cascade cleanup all dependent records across 4 collections
+    await Promise.all([
+      BookmarkModel.deleteMany({ post: id }, { session }),
+      ReactionModel.deleteMany({ post: id }, { session }),
+      CommentModel.deleteMany({ post: id }, { session }),
+      NotificationModel.deleteMany({ post: id }, { session }),
+    ]);
 
-  if (!userId) {
-    return res.status(401).json({
-      success: false,
-      message: "Authentication required",
-    });
+    await session.commitTransaction();
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
   }
 
-  const drafts = await PostModel.find({
-    author: userId,
-    isDraft: true,
-  })
-    .sort({ updatedAt: -1 })
-    .populate("author", "name username avatar")
-    .lean();
-
-  return sendSuccess(res, 200, "Drafts fetched successfully", {
-    drafts,
-    total: drafts.length,
-  });
+  return sendSuccess(
+    res,
+    200,
+    "Post and all associated data deleted successfully",
+  );
 });
