@@ -31,16 +31,7 @@ export default function PostDetailPage({
 
   const router = useRouter();
   const { user } = useAuth();
-  const toastContext = useToast();
-  const triggerToast = (
-    msg: string,
-    type: "success" | "error" | "info" = "info",
-  ) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ctx = toastContext as any;
-    if (typeof ctx.toast === "function") ctx.toast(msg, type);
-    else if (typeof ctx.addToast === "function") ctx.addToast(msg, type);
-  };
+  const { toast } = useToast();
 
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
@@ -82,12 +73,12 @@ export default function PostDetailPage({
     try {
       setDeleting(true);
       await api.delete(`/posts/${postId}`);
-      triggerToast("Post deleted successfully", "success");
+      toast("Post deleted successfully", "success");
       router.push("/");
     } catch (err: unknown) {
       const msg =
         err instanceof ApiError ? err.message : "Failed to delete post";
-      triggerToast(msg, "error");
+      toast(msg, "error");
       setDeleting(false);
     }
   };
@@ -122,7 +113,6 @@ export default function PostDetailPage({
     );
   }
 
-  // Safe null checks against undefined content string
   const postContent = typeof post.content === "string" ? post.content : "";
   const words = postContent.trim() ? postContent.trim().split(/\s+/).length : 0;
   const readTime = Math.max(1, Math.ceil(words / 200));
@@ -181,9 +171,8 @@ export default function PostDetailPage({
         )}
       </div>
 
-      {/* Article Article Container */}
+      {/* Article Container */}
       <article className="card-surface p-6 sm:p-10 rounded-2xl border border-slate-800 bg-slate-900/60">
-        {/* Category Pill & Draft Indicator */}
         <div className="flex items-center gap-2 mb-4">
           <span className="text-xs font-mono px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 text-blue-400 uppercase font-semibold">
             {post.category}
@@ -195,12 +184,10 @@ export default function PostDetailPage({
           )}
         </div>
 
-        {/* Title */}
         <h1 className="text-2xl sm:text-4xl font-extrabold text-slate-100 tracking-tight leading-tight">
           {post.title}
         </h1>
 
-        {/* Author & Reading Metadata */}
         <div className="flex flex-wrap items-center justify-between gap-4 py-5 my-6 border-y border-slate-800/80">
           <Link
             href={`/profile/${post.author?.username || ""}`}
@@ -239,7 +226,6 @@ export default function PostDetailPage({
               {readTime} min read
             </span>
 
-            {/* Reaction Button in header */}
             <ReactionButton
               postId={post._id}
               initialCount={post.reactionsCount || 0}
@@ -249,7 +235,6 @@ export default function PostDetailPage({
           </div>
         </div>
 
-        {/* Cover Image Banner (If present) */}
         {post.coverImage && (
           <div className="mb-8 rounded-2xl overflow-hidden border border-slate-800 max-h-110 bg-slate-950">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -261,12 +246,10 @@ export default function PostDetailPage({
           </div>
         )}
 
-        {/* Markdown Content with Prism.js Highlighting */}
         <div className="py-2">
           <MarkdownRenderer content={postContent} />
         </div>
 
-        {/* Tags Footer */}
         {post.tags && post.tags.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 pt-6 mt-8 border-t border-slate-800">
             <span className="text-xs text-slate-500 font-mono flex items-center gap-1 mr-1">
@@ -284,7 +267,6 @@ export default function PostDetailPage({
         )}
       </article>
 
-      {/* Discussion Section */}
       <CommentSection
         postId={post._id}
         commentsCount={post.commentsCount || 0}

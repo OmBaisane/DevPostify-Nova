@@ -23,16 +23,7 @@ interface DraftsResponseData {
 }
 
 export default function DraftsPage() {
-  const toastContext = useToast();
-  const triggerToast = (
-    msg: string,
-    type: "success" | "error" | "info" = "info",
-  ) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ctx = toastContext as any;
-    if (typeof ctx.toast === "function") ctx.toast(msg, type);
-    else if (typeof ctx.addToast === "function") ctx.addToast(msg, type);
-  };
+  const { toast } = useToast();
 
   const [drafts, setDrafts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,7 +39,7 @@ export default function DraftsPage() {
     } catch (err: unknown) {
       const msg =
         err instanceof ApiError ? err.message : "Failed to load drafts";
-      triggerToast(msg, "error");
+      toast(msg, "error");
     } finally {
       setLoading(false);
     }
@@ -63,11 +54,11 @@ export default function DraftsPage() {
       setActionLoadingId(postId);
       await api.patch(`/posts/${postId}`, { isDraft: false });
       setDrafts((prev) => prev.filter((d) => d._id !== postId));
-      triggerToast("Draft published successfully to public feed!", "success");
+      toast("Draft published successfully to public feed!", "success");
     } catch (err: unknown) {
       const msg =
         err instanceof ApiError ? err.message : "Failed to publish draft";
-      triggerToast(msg, "error");
+      toast(msg, "error");
     } finally {
       setActionLoadingId(null);
     }
@@ -84,11 +75,11 @@ export default function DraftsPage() {
       setActionLoadingId(postId);
       await api.delete(`/posts/${postId}`);
       setDrafts((prev) => prev.filter((d) => d._id !== postId));
-      triggerToast("Draft deleted", "success");
+      toast("Draft deleted", "success");
     } catch (err: unknown) {
       const msg =
         err instanceof ApiError ? err.message : "Failed to delete draft";
-      triggerToast(msg, "error");
+      toast(msg, "error");
     } finally {
       setActionLoadingId(null);
     }

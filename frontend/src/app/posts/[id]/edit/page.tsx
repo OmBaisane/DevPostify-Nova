@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Upload,
   Loader2,
   Image as ImageIcon,
   X,
@@ -31,16 +30,7 @@ export default function EditPostPage({
 
   const router = useRouter();
   const { user } = useAuth();
-  const toastContext = useToast();
-  const triggerToast = (
-    msg: string,
-    type: "success" | "error" | "info" = "info",
-  ) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ctx = toastContext as any;
-    if (typeof ctx.toast === "function") ctx.toast(msg, type);
-    else if (typeof ctx.addToast === "function") ctx.addToast(msg, type);
-  };
+  const { toast } = useToast();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -64,14 +54,13 @@ export default function EditPostPage({
         const res = await api.get<{ post: Post }>(`/posts/${postId}`);
         if (res.data?.post) {
           const p = res.data.post;
-          // Guard: Only author can edit
           if (
             user &&
             p.author._id !== user._id &&
             p.author.id !== user._id &&
             p.author.username !== user.username
           ) {
-            triggerToast("Unauthorized to edit this article", "error");
+            toast("Unauthorized to edit this article", "error");
             router.push("/");
             return;
           }
@@ -93,7 +82,7 @@ export default function EditPostPage({
     };
 
     fetchPost();
-  }, [postId, user]);
+  }, [postId, user, router, toast]);
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -104,11 +93,11 @@ export default function EditPostPage({
       setError(null);
       const url = await uploadImageDirect(file, "devpostify/covers");
       setCoverImage(url);
-      triggerToast("Cover image updated", "success");
+      toast("Cover image updated", "success");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Failed to upload cover";
       setError(msg);
-      triggerToast(msg, "error");
+      toast(msg, "error");
     } finally {
       setUploadingCover(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -136,7 +125,7 @@ export default function EditPostPage({
         isDraft,
       });
 
-      triggerToast("Post updated successfully!", "success");
+      toast("Post updated successfully!", "success");
       router.push(`/posts/${postId}`);
     } catch (err: unknown) {
       if (err instanceof ApiError) {
@@ -179,7 +168,7 @@ export default function EditPostPage({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Cover Image Upload Area */}
+          {/* Cover Image Upload */}
           <div className="card-surface p-4 rounded-2xl border border-slate-800 bg-slate-900/60">
             <span className="block text-xs font-medium text-slate-300 mb-2">
               Article Cover Image

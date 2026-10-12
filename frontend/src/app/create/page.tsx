@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
-  Upload,
   Loader2,
   Image as ImageIcon,
   X,
@@ -16,22 +15,13 @@ import { MarkdownRenderer } from "@/components/markdown/MarkdownRenderer";
 import { useToast } from "@/context/ToastContext";
 import { api, ApiError } from "@/lib/api";
 import { uploadImageDirect } from "@/lib/upload";
+import { Post } from "@/types/post";
 
 const CATEGORIES = ["webdev", "architecture", "devops", "opensource", "ai"];
 
 export default function CreatePostPage() {
   const router = useRouter();
-  const toastContext = useToast();
-  const triggerToast = (
-    msg: string,
-    type: "success" | "error" | "info" = "info",
-  ) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ctx = toastContext as any;
-    if (typeof ctx.toast === "function") ctx.toast(msg, type);
-    else if (typeof ctx.addToast === "function") ctx.addToast(msg, type);
-  };
-
+  const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [title, setTitle] = useState("");
@@ -55,12 +45,12 @@ export default function CreatePostPage() {
       setError(null);
       const url = await uploadImageDirect(file, "devpostify/covers");
       setCoverImage(url);
-      triggerToast("Cover image uploaded", "success");
+      toast("Cover image uploaded", "success");
     } catch (err: unknown) {
       const msg =
         err instanceof Error ? err.message : "Failed to upload cover image";
       setError(msg);
-      triggerToast(msg, "error");
+      toast(msg, "error");
     } finally {
       setUploadingCover(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -79,7 +69,7 @@ export default function CreatePostPage() {
 
     try {
       setSubmitting(true);
-      const res = await api.post<{ post: { _id: string } }>("/posts", {
+      const res = await api.post<{ post: Post }>("/posts", {
         title: title.trim(),
         category,
         content: content.trim(),
@@ -88,12 +78,14 @@ export default function CreatePostPage() {
         isDraft,
       });
 
-      triggerToast(
-        isDraft ? "Draft saved successfully" : "Technical article published!",
+      toast(
+        isDraft ? "Draft saved successfully!" : "Article published live!",
         "success",
       );
 
-      if (res.data?.post?._id) {
+      if (isDraft) {
+        router.push("/drafts");
+      } else if (res.data?.post?._id) {
         router.push(`/posts/${res.data.post._id}`);
       } else {
         router.push("/");
@@ -102,7 +94,7 @@ export default function CreatePostPage() {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
-        setError("Failed to create post. Please check inputs.");
+        setError("Failed to create post. Please check the fields.");
       }
     } finally {
       setSubmitting(false);
@@ -120,7 +112,7 @@ export default function CreatePostPage() {
             <ArrowLeft className="w-3.5 h-3.5" /> Back to Feed
           </Link>
           <span className="text-xs text-slate-500 font-mono">
-            Markdown (GFM) + Prism.js Highlighting
+            New Technical Article
           </span>
         </div>
 
@@ -162,10 +154,10 @@ export default function CreatePostPage() {
                   accept="image/jpeg,image/png,image/webp"
                   onChange={handleCoverUpload}
                   className="hidden"
-                  id="cover-file-input"
+                  id="create-cover-input"
                 />
                 <label
-                  htmlFor="cover-file-input"
+                  htmlFor="create-cover-input"
                   className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-800 hover:border-slate-700 rounded-xl cursor-pointer bg-slate-950/50 transition group"
                 >
                   {uploadingCover ? (
@@ -203,7 +195,7 @@ export default function CreatePostPage() {
                 maxLength={160}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Scaling Kafka Event Consumers in Production"
+                placeholder="e.g. Architecting Distributed Systems with Apache Kafka"
                 className="input-surface w-full px-3.5 py-2.5 text-sm"
               />
             </div>
@@ -213,7 +205,7 @@ export default function CreatePostPage() {
                 htmlFor="post-category"
                 className="block text-xs font-medium text-slate-300 mb-1"
               >
-                Engineering Category
+                Category
               </label>
               <select
                 id="post-category"
@@ -243,7 +235,7 @@ export default function CreatePostPage() {
               type="text"
               value={tagsInput}
               onChange={(e) => setTagsInput(e.target.value)}
-              placeholder="kafka, microservices, distributed-systems"
+              placeholder="kafka, distributed, microservices"
               className="input-surface w-full px-3.5 py-2 text-xs font-mono"
             />
           </div>
@@ -261,7 +253,7 @@ export default function CreatePostPage() {
                       : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
-                  Write
+                  Write Markdown
                 </button>
                 <button
                   type="button"
@@ -288,13 +280,7 @@ export default function CreatePostPage() {
                 minLength={20}
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Share your technical breakdown, architecture design, and code examples here...
-
-```typescript
-function processEvent(event: SystemEvent) {
-  // Production-grade event handling
-}
-```"
+                placeholder="Write your in-depth technical analysis or tutorial using GitHub Flavored Markdown..."
                 className="w-full bg-transparent p-4 text-sm font-mono text-slate-200 placeholder:text-slate-500 focus:outline-none resize-y leading-relaxed"
               />
             ) : (
@@ -303,8 +289,7 @@ function processEvent(event: SystemEvent) {
                   <MarkdownRenderer content={content} />
                 ) : (
                   <span className="text-xs text-slate-500 italic">
-                    Nothing to preview yet. Switch back to Write mode to compose
-                    your post.
+                    Type markdown in write mode to see live rendered preview.
                   </span>
                 )}
               </div>
@@ -321,7 +306,7 @@ function processEvent(event: SystemEvent) {
                 className="w-4 h-4 rounded border-slate-700 bg-slate-800 text-blue-600 focus:ring-blue-500"
               />
               <span className="text-xs text-slate-300 font-medium">
-                Save as Private Draft (Hidden from public feed)
+                Save as Private Draft (Keep hidden until ready)
               </span>
             </label>
 
@@ -333,7 +318,7 @@ function processEvent(event: SystemEvent) {
               {submitting ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  {isDraft ? "Saving Draft..." : "Publishing..."}
+                  Publishing...
                 </>
               ) : (
                 <>
