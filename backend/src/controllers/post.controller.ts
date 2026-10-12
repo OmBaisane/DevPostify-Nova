@@ -197,17 +197,16 @@ export const createPost = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
-  const { title, content, category, tags, coverImage, isDraft } = req.body;
+  const { title, content, category, tags, coverImage, isDraft } =
+    parseResult.data;
 
   const post = await PostModel.create({
     title,
     content,
-    category: category.toLowerCase().trim(),
-    tags: Array.isArray(tags)
-      ? tags.map((t: string) => t.toLowerCase().trim())
-      : [],
-    coverImage: typeof coverImage === "string" ? coverImage.trim() : "",
-    isDraft: Boolean(isDraft),
+    category,
+    tags,
+    coverImage,
+    isDraft,
     author: req.userId,
   });
 
@@ -268,17 +267,7 @@ export const updatePost = asyncHandler(async (req: Request, res: Response) => {
     });
   }
 
-  const { title, content, category, tags, coverImage, isDraft } = req.body;
-  const updateData: Record<string, unknown> = {};
-
-  if (typeof title === "string") updateData.title = title.trim();
-  if (typeof content === "string") updateData.content = content.trim();
-  if (typeof category === "string")
-    updateData.category = category.toLowerCase().trim();
-  if (Array.isArray(tags))
-    updateData.tags = tags.map((t: string) => t.toLowerCase().trim());
-  if (typeof coverImage === "string") updateData.coverImage = coverImage.trim();
-  if (typeof isDraft === "boolean") updateData.isDraft = isDraft;
+  const updateData = parseResult.data;
 
   const updatedPost = await PostModel.findByIdAndUpdate(
     id,

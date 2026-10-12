@@ -4,18 +4,11 @@ import { env } from "../config/env.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-// Initialize Cloudinary instance
-cloudinary.config({
-  cloud_name: env.CLOUDINARY_CLOUD_NAME,
-  api_key: env.CLOUDINARY_API_KEY,
-  api_secret: env.CLOUDINARY_API_SECRET,
-  secure: true,
-});
+const ALLOWED_FOLDERS = new Set(["devpostify/covers", "devpostify/avatars"]);
 
-/**
- * Generates an authenticated signature for direct client-to-Cloudinary uploads.
- * Restricts folder and timestamps to prevent signature tampering.
- */
+// @desc    Generate signed params for secure direct upload to Cloudinary
+// @route   POST /api/upload/signature
+// @access  Private
 export const getUploadSignature = asyncHandler(
   async (req: Request, res: Response) => {
     if (!env.CLOUDINARY_API_SECRET || !env.CLOUDINARY_API_KEY) {
@@ -25,30 +18,31 @@ export const getUploadSignature = asyncHandler(
       });
     }
 
-    const { folder = "devpostify/avatars" } = req.body;
+    const rawFolder =
+      typeof req.body.folder === "string"
+        ? req.body.folder.trim()
+        : "devpostify/covers";
 
-    // Strict folder whitelist to avoid bucket abuse
-    const allowedFolders = ["devpostify/avatars", "devpostify/covers"];
-    const targetFolder = allowedFolders.includes(folder)
-      ? folder
-      : "devpostify/avatars";
-
+    // Strict folder boundary whitelist
+    const folder = ALLOWED_FOLDERS.has(rawFolder)
+      ? rawFolder
+      : "devpostify/covers";
     const timestamp = Math.round(new Date().getTime() / 1000);
 
     const signature = cloudinary.utils.api_sign_request(
       {
         timestamp,
-        folder: targetFolder,
+        folder,
       },
       env.CLOUDINARY_API_SECRET,
     );
 
     return sendSuccess(res, 200, "Upload signature generated", {
-      timestamp,
       signature,
+      timestamp,
+      folder,
       apiKey: env.CLOUDINARY_API_KEY,
       cloudName: env.CLOUDINARY_CLOUD_NAME,
-      folder: targetFolder,
     });
   },
 );

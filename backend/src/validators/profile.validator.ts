@@ -1,40 +1,48 @@
 import { z } from "zod";
 
-const optionalUrl = z
+const safeUrlSchema = z
   .string()
   .trim()
+  .max(250, "URL too long")
   .refine(
-    (val) => val === "" || /^https?:\/\/.+/i.test(val),
-    "Must be a valid URL starting with http:// or https://",
+    (val) => !val || val.startsWith("https://") || val.startsWith("http://"),
+    "Link must be a valid HTTP or HTTPS URL",
   )
-  .optional();
+  .optional()
+  .default("");
 
 export const updateProfileSchema = z.object({
   name: z
     .string()
     .trim()
-    .min(1, "Name cannot be empty")
+    .min(2, "Name must be at least 2 characters")
     .max(60, "Name cannot exceed 60 characters")
     .optional(),
   bio: z
     .string()
     .trim()
     .max(300, "Bio cannot exceed 300 characters")
-    .optional(),
-  avatar: optionalUrl,
+    .optional()
+    .default(""),
+  avatar: safeUrlSchema,
   skills: z
-    .array(z.string().trim().max(25, "Skill name too long"))
-    .max(15, "You can add up to 15 skills")
-    .optional(),
+    .array(z.string().trim().max(30, "Skill label too long"))
+    .transform((skills) =>
+      Array.from(new Set(skills.filter(Boolean))).slice(0, 15),
+    )
+    .optional()
+    .default([]),
   specialties: z
-    .array(z.string().trim().max(30, "Specialty name too long"))
-    .max(5, "You can add up to 5 specialties")
-    .optional(),
+    .array(z.string().trim().max(30, "Specialty label too long"))
+    .transform((spec) => Array.from(new Set(spec.filter(Boolean))).slice(0, 5))
+    .optional()
+    .default([]),
   socials: z
     .object({
-      github: optionalUrl,
-      linkedin: optionalUrl,
-      website: optionalUrl,
+      github: safeUrlSchema,
+      linkedin: safeUrlSchema,
+      website: safeUrlSchema,
     })
-    .optional(),
+    .optional()
+    .default({ github: "", linkedin: "", website: "" }),
 });
