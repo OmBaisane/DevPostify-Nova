@@ -3,7 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { env } from "./config/env.js";
-import { connectDatabase } from "./config/database.js";
+import { connectDB } from "./config/database.js";
 import authRoutes from "./routes/auth.routes.js";
 import postRoutes from "./routes/post.routes.js";
 import profileRoutes from "./routes/profile.routes.js";
@@ -70,13 +70,15 @@ app.use("/api/search", searchRoutes);
 app.use(errorHandler);
 
 const startServer = async () => {
-  // If { connectDatabase } is a function (named or default), call it
-  if (typeof { connectDatabase } === "function") {
-    await connectDatabase();
+  try {
+    await connectDB();
+    app.listen(env.PORT, () => {
+      console.log(`🚀 DevPostify Nova API running on port ${env.PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
   }
-  app.listen(env.PORT, () => {
-    console.log(`🚀 DevPostify Nova API running on port ${env.PORT}`);
-  });
 };
 
 startServer();
