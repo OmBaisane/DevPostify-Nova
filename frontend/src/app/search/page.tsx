@@ -1,119 +1,168 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { api } from "@/lib/api";
+import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import {
+  Search as SearchIcon,
+  Calendar,
+  Clock,
+  Loader2,
+  ArrowRight,
+} from "lucide-react";
+import { api, ApiError } from "@/lib/api";
 import { Post } from "@/types/post";
-import PostCard from "@/components/posts/PostCard";
-import PostSkeleton from "@/components/posts/PostSkeleton";
-import EmptyState from "@/components/ui/EmptyState";
-import { Search as SearchIcon, Loader2 } from "lucide-react";
+import { useToast } from "@/context/ToastContext";
 
-function SearchContent() {
-  const searchParams = useSearchParams();
-  const initialQuery = searchParams.get("q") || "";
-
-  const [query, setQuery] = useState(initialQuery);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleSearch = useCallback(async (searchTerm: string) => {
-    if (!searchTerm.trim()) {
-      setPosts([]);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      const res = await api.get<{ posts: Post[] }>("/search", {
-        params: { q: searchTerm.trim() },
-      });
-      if (res.data?.posts) {
-        setPosts(res.data.posts);
-      } else {
-        setPosts([]);
-      }
-    } catch {
-      setPosts([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (initialQuery) {
-      handleSearch(initialQuery);
-    }
-  }, [initialQuery, handleSearch]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleSearch(query);
-  };
-
-  return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
-      {/* Search Header */}
-      <div className="mb-8">
-        <h1 className="font-heading text-2xl font-bold text-slate-100 sm:text-3xl mb-2">
-          Discover Insights
-        </h1>
-        <p className="text-xs text-slate-400 mb-6">
-          Search engineering posts by title, markdown content, tags, or topics.
-        </p>
-
-        <form onSubmit={handleSubmit} className="relative">
-          <input
-            type="text"
-            placeholder="Search keywords, e.g. zustand, mongodb, caching..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="w-full input-surface py-3 pl-11 pr-24 text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 transition"
-          />
-          <SearchIcon className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-500" />
-          <button
-            type="submit"
-            className="absolute right-2 top-2 btn-primary px-4 py-1.5 text-xs font-medium shadow-md"
-          >
-            Search
-          </button>
-        </form>
-      </div>
-
-      {/* Results */}
-      <div className="space-y-4">
-        {isLoading ? (
-          <>
-            <PostSkeleton />
-            <PostSkeleton />
-          </>
-        ) : posts.length > 0 ? (
-          posts.map((post) => <PostCard key={post._id} post={post} />)
-        ) : query.trim() ? (
-          <EmptyState
-            title="No matching posts found"
-            description={`We couldn't find any articles matching "${query}". Try searching by generic technical tags.`}
-          />
-        ) : (
-          <div className="card-surface p-8 text-center text-xs text-slate-500">
-            Type keywords above to discover community articles.
-          </div>
-        )}
-      </div>
-    </div>
-  );
+interface SearchResponseData {
+  posts: Post[];
+  query: string;
 }
 
 export default function SearchPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-[50vh] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
-        </div>
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [results, setResults] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const performSearch = useCallback(
+    async (query: string) => {
+      const cleanQuery = query.trim().slice(0, 80);
+      if (cleanQuery.length < 2) {
+        setResults([]);
+        setHasSearched(false);
+        return;
       }
-    >
-      <SearchContent />
-    </Suspense>
+
+      try {
+        setLoading(true);
+        setHasSearched(true);
+        const res = await api.get<SearchResponseData>(
+          `/search?q=${encodeURIComponent(cleanQuery)}`,
+        );
+        if (res.data) {
+          setResults(res.data.posts || []);
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof ApiError ? err.message : "Search failed";
+        toast(msg, "error");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [toast],
+  );
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchTerm.trim().length >= 2) {
+        performSearch(searchTerm);
+      } else {
+        setResults([]);
+        setHasSearched(false);
+      }
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm, performSearch]);
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    performSearch(searchTerm);
+  };
+
+  return (
+    <main className="max-w-4xl mx-auto px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2 mb-2">
+          <SearchIcon className="w-6 h-6 text-blue-400" />
+          <span>Explore Knowledge</span>
+        </h1>
+        <p className="text-xs text-slate-400">
+          Search technical articles by title, keywords, categories, or developer
+          concepts.
+        </p>
+      </div>
+
+      <form onSubmit={handleFormSubmit} className="mb-8">
+        <div className="relative">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            maxLength={80}
+            placeholder="Search architecture, docker, next.js, microservices..."
+            className="input-surface w-full pl-11 pr-24 py-3.5 text-sm font-mono placeholder:text-slate-500"
+          />
+          <SearchIcon className="w-5 h-5 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            {loading && (
+              <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+            )}
+            <span className="text-[10px] font-mono text-slate-500">
+              {searchTerm.length}/80
+            </span>
+          </div>
+        </div>
+      </form>
+
+      {/* Results Section */}
+      {loading ? (
+        <div className="space-y-4 animate-pulse">
+          <div className="h-28 bg-slate-900/40 rounded-2xl border border-slate-800" />
+          <div className="h-28 bg-slate-900/40 rounded-2xl border border-slate-800" />
+        </div>
+      ) : hasSearched && results.length === 0 ? (
+        <div className="card-surface p-12 text-center rounded-2xl border border-slate-800 bg-slate-900/40">
+          <SearchIcon className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+          <h2 className="text-base font-bold text-slate-200">
+            No Matching Articles Found
+          </h2>
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+            Try searching for broader keywords, programming languages, or
+            architectural topics.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {results.map((post) => (
+            <Link
+              key={post._id}
+              href={`/posts/${post._id}`}
+              className="card-surface p-5 sm:p-6 rounded-2xl border border-slate-800 bg-slate-900/60 block transition hover:border-slate-700/80 group"
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border border-blue-500/20 bg-blue-500/10 text-blue-400 uppercase font-semibold">
+                  {post.category}
+                </span>
+                <span className="text-[11px] text-slate-500 font-mono flex items-center gap-1">
+                  <Calendar className="w-3 h-3" />
+                  {new Date(post.createdAt).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+
+              <h2 className="text-base sm:text-lg font-bold text-slate-100 group-hover:text-blue-400 transition truncate">
+                {post.title}
+              </h2>
+
+              <p className="text-xs text-slate-400 mt-2 line-clamp-2 leading-relaxed">
+                {post.content.slice(0, 180)}...
+              </p>
+
+              <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-800 text-xs text-slate-500 font-mono">
+                <span>By @{post.author?.username || "developer"}</span>
+                <span className="inline-flex items-center gap-1 text-blue-400 group-hover:translate-x-1 transition-transform">
+                  Read Article <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </main>
   );
 }

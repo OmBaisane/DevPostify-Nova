@@ -12,12 +12,13 @@ function escapeRegex(text: string): string {
 
 export const searchPosts = asyncHandler(async (req: Request, res: Response) => {
   const rawQuery = typeof req.query.q === "string" ? req.query.q : "";
-  const sanitizedQuery = rawQuery.trim().slice(0, 100);
+  // Normalize whitespace and clamp strictly to 80 characters
+  const sanitizedQuery = rawQuery.replace(/\s+/g, " ").trim().slice(0, 80);
 
-  if (!sanitizedQuery) {
+  if (!sanitizedQuery || sanitizedQuery.length < 2) {
     return sendSuccess(res, 200, "Search results fetched successfully", {
       posts: [],
-      query: "",
+      query: sanitizedQuery,
     });
   }
 

@@ -83,6 +83,7 @@ PostSchema.index({
   title: "text",
   content: "text",
   tags: "text",
+  category: "text",
 });
 
 export const PostModel: Model<PostDocument> =
