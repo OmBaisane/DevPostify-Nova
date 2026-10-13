@@ -50,10 +50,14 @@ app.use("/api", generalLimiter);
 app.use("/api", verifyRequestOrigin);
 
 // Health check endpoint
+// Production health check & cold-start monitor
 app.get("/api/health", (_req, res) => {
-  res
-    .status(200)
-    .json({ status: "healthy", timestamp: new Date().toISOString() });
+  res.status(200).json({
+    status: "ok",
+    service: "DevPostify-Nova-API",
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Mount Routes with specialized rate limits where critical
