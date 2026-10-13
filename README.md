@@ -1,350 +1,147 @@
 # DevPostify Nova
 
-> **Where Developers Build Their Identity.**
+> Where Developers Build Their Identity.
 
-DevPostify Nova is a developer-first professional publishing platform built for software engineers to share technical knowledge, explain system architectures, showcase implementations, and build a professional engineering identity — without the noise of generic social media.
-
-It was built from scratch with a production-oriented architecture, secure authentication, structured content rendering, developer-focused UX, and a fully deployed REST API.
+DevPostify Nova is a developer-first professional technical publishing and identity platform. It is engineered to help software engineers publish deep-dive architectural insights, showcase verified project expertise, engage in focused technical discussions, and curate bookmarks.
 
 ---
 
-## 🚀 Live Project
+## ⚡ Core Features (V1.1)
 
-| Service            | Link                                                |
-| ------------------ | --------------------------------------------------- |
-| **Production App** | https://dev-postify-nova.vercel.app                 |
-| **REST API**       | https://devpostify-nova-api.onrender.com            |
-| **API Health**     | https://devpostify-nova-api.onrender.com/api/health |
+- **Authentication & Security:**
+  - Secure credential registration and login with username or email.
+  - Cross-domain HttpOnly cookie authentication powered by JSON Web Tokens (JWT).
+  - Production-grade security headers with Helmet and strict origin verification on state mutations.
+  - Tiered rate-limiting on sensitive authentication and media upload endpoints.
 
----
+- **Technical Publishing & Draft Workflow:**
+  - Markdown editor with live Write / Preview modes (`react-markdown`, `remark-gfm`, Prism syntax highlighting).
+  - Five locked technical domains: `webdev`, `architecture`, `devops`, `opensource`, `ai`.
+  - Secure, signed Cloudinary cover-image upload pipeline.
+  - Private drafts isolated at the database level with a dedicated `/drafts` management dashboard.
 
-## ✨ V1 Features
+- **Developer Identity & Profiles:**
+  - Custom developer profiles indexed by `@username`.
+  - Showcase technical specialties, core skills, GitHub, LinkedIn, and personal websites.
+  - Avatar uploads powered by Cloudinary with client/server validation.
 
-### 🔐 Authentication
+- **Engineering Engagement & Discussions:**
+  - Race-safe, atomic post reactions with optimistic UI updates.
+  - Flat, single-level technical discussion threads with author deletion privileges.
+  - Persistent notification stream with deep linking and unread badge counters.
 
-- User registration and login
-- Login using email or username
-- JWT-based authentication
-- HTTP-only secure cookies
-- Protected routes
-- Session termination
-- Author ownership validation
-
-### 📝 Technical Publishing
-
-- Create, edit, and delete posts
-- GitHub-Flavored Markdown (GFM)
-- Live write/preview editor
-- Syntax-highlighted code blocks
-- Copy-to-clipboard code actions
-- Reading-time information
-- Engineering-focused categories
-- Author ownership checks
-
-### 👤 Developer Profiles
-
-- Public developer profiles
-- Editable name and bio
-- Published post listings
-- Developer-focused profile presentation
-
-### 🔎 Discovery
-
-- MongoDB full-text search
-- Category filtering
-- Sanitized search input
-- Paginated feed results
-
-### 🔖 Bookmarks
-
-- Save technical posts
-- Remove bookmarks
-- Dedicated bookmarks page
-- Duplicate-safe bookmark handling
-
-### ⚙️ Settings
-
-- Developer dark mode
-- Account credentials overview
-- Authenticated session termination
-
-### ♿ UX & Accessibility
-
-- Responsive desktop/mobile layouts
-- Off-canvas mobile navigation
-- Loading and skeleton states
-- Empty states
-- Error states
-- Form validation
-- Semantic HTML landmarks
-- Keyboard-friendly interactions
-- Accessible navigation patterns
+- **Discovery & Discovery Controls:**
+  - Sort by Latest or Top Insights.
+  - Category tabs and tag filtering.
+  - ReDoS-protected search with strict input boundaries and regex escaping.
+  - Instant post bookmarking with dedicated `/bookmarks` view.
 
 ---
 
-## 🏗️ Architecture
+## 🛠️ Architecture & Tech Stack
 
 ```text
-┌──────────────────────────────┐
-│      Next.js Frontend        │
-│       App Router + React     │
-│                              │
-│          Vercel              │
-└──────────────┬───────────────┘
-               │
-               │ HTTPS REST API
-               │ credentials: include
-               ▼
-┌──────────────────────────────┐
-│      Express REST API        │
-│      Node.js + TypeScript    │
-│                              │
-│           Render             │
-└──────────────┬───────────────┘
-               │
-               │ Mongoose ODM
-               ▼
-┌──────────────────────────────┐
-│        MongoDB Atlas         │
-│                              │
-│ Users · Posts · Bookmarks    │
-└──────────────────────────────┘
-The frontend and backend are intentionally decoupled.
-The frontend communicates with the backend exclusively through REST APIs. The backend is responsible for authentication, authorization, validation, business logic, and database access.
-The frontend never connects directly to MongoDB.
+Next.js 15 (App Router, React 19)
+       │
+       │  HTTPS REST API (HttpOnly Cookies, CORS, Rate Limited)
+       ▼
+Express Backend (Node.js, TypeScript)
+       │
+       │  Mongoose ODM
+       ▼
+MongoDB Atlas  ◄─── Signed Uploads ───►  Cloudinary CDN
+Frontend: Next.js (App Router), React 19, Strict TypeScript, Tailwind CSS, Lucide React.
 
-🛠️ Tech Stack
+Backend: Node.js, Express, TypeScript, Mongoose, Zod, Helmet, express-rate-limit.
 
-Frontend : 
+Database: MongoDB Atlas.
 
-Next.js App Router
-React 19
-TypeScript (Strict)
-Tailwind CSS
-Lucide React
-React Markdown
-Remark GFM
-Prism.js
+Media Pipeline: Cloudinary Signed Uploads.
 
-Backend : 
+Deployment: Vercel (Frontend), Render (Backend).
 
-Node.js
-Express
-TypeScript
-JSON Web Tokens (JWT)
-Cookie Parser
-Zod
-Mongoose
-Database & Infrastructure
-MongoDB Atlas
-
-Deployment : 
-
-Vercel
-Render
-
-🔒 Engineering & Security
-
-DevPostify Nova was designed with production-oriented security and maintainability in mind.
+📡 REST API Inventory
 Authentication
-Authentication uses stateless JWT sessions stored in HTTP-only cookies.
-Production cookies use:
-HttpOnly
-Secure
-SameSite=None
-Path=/
-The Express server also explicitly trusts the required reverse-proxy hop for production cookie handling.
-Authorization
-Protected operations verify the authenticated user before modifying resources.
+POST /api/auth/register — Create account
 
-Users can only:
+POST /api/auth/login — Sign in and issue HttpOnly cookie
 
-Edit their own posts
-Delete their own posts
-Modify their own profile
-Manage their own bookmarks
-Input Validation
-Frontend validation is aligned with backend Zod schemas for important user-facing constraints.
+POST /api/auth/logout — Invalidate session cookie
 
-Examples include:
+GET  /api/auth/me — Restore current authenticated user
 
-8+ character passwords
-Alphanumeric usernames
-160-character post titles
-Locked engineering categories
-Bounded search input
-Search Security
-Search input is length-bounded and safely escaped before being used in regular-expression based search paths, reducing exposure to regex-based denial-of-service patterns.
-Markdown Rendering
-Markdown is rendered through an AST-based React Markdown pipeline with GFM support.
-Raw HTML execution is not enabled, and code blocks are processed through Prism.js for syntax highlighting.
+Technical Posts
+GET    /api/posts — Fetch published feed (supports category, tag, sort)
 
-📁 Project Structure
+GET    /api/posts/:id — Fetch post detail (auth-aware draft access)
 
-DevPostify-Nova/
-│
-├── frontend/
-│   ├── src/
-│   │   ├── app/
-│   │   ├── components/
-│   │   ├── contexts/
-│   │   └── lib/
-│   └── package.json
-│
-├── backend/
-│   ├── src/
-│   │   ├── controllers/
-│   │   ├── middleware/
-│   │   ├── models/
-│   │   ├── routes/
-│   │   ├── schemas/
-│   │   └── utils/
-│   └── package.json
-│
-├── README.md
-├── .gitignore
-└── DEVPOSTIFY_NOVA_CONTEXT.md
-🔌 REST API
+POST   /api/posts — Create publication or draft
 
-Authentication
+PATCH  /api/posts/:id — Update post or publish draft
 
-POST /api/auth/register
-POST /api/auth/login
-POST /api/auth/logout
-GET  /api/auth/me
-Posts
-GET    /api/posts
-GET    /api/posts/:id
-POST   /api/posts
-PATCH  /api/posts/:id
-DELETE /api/posts/:id
-Profiles
-GET   /api/profile/:username
-PATCH /api/profile
-Bookmarks
-GET    /api/bookmarks
-POST   /api/bookmarks/:postId
-DELETE /api/bookmarks/:postId
-Discovery
-GET /api/search
-Health
-GET /api/health
+DELETE /api/posts/:id — Cascade delete post and dependent relations
 
-⚙️ Local Development
+Reactions & Discussions
+POST   /api/posts/:id/react — Atomic toggle reaction
 
-1. Clone the repository
+GET    /api/posts/:id/react — Check reaction status
 
-git clone https://github.com/OmBaisane/DevPostify-Nova.git
-cd DevPostify-Nova
+GET    /api/posts/:id/comments — Fetch post comments
 
-2. Configure the backend
+POST   /api/posts/:id/comments — Add comment
 
+DELETE /api/comments/:commentId — Delete comment (author-only)
+
+Developer Profile
+GET   /api/profile/:username — Fetch developer profile and publications
+
+PATCH /api/profile — Update bio, skills, specialties, and socials
+
+Notifications & Bookmarks
+GET   /api/notifications — Fetch notification stream
+
+GET   /api/notifications/unread-count — Unread count for navbar badge
+
+PATCH /api/notifications/:id/read — Mark notification read
+
+PATCH /api/notifications/read-all — Mark all notifications read
+
+GET   /api/bookmarks — List bookmarked articles
+
+POST  /api/bookmarks/:postId — Bookmark article
+
+DELETE /api/bookmarks/:postId — Remove bookmark
+
+System & Media
+POST /api/upload/signature — Generate signed Cloudinary upload params
+
+GET  /api/search — ReDoS-protected fuzzy search
+
+GET  /api/health — Healthcheck and uptime monitor
+
+🚀 Local Development Setup
+1. Prerequisites
+Node.js 20+
+
+MongoDB instance (local or Atlas)
+
+Cloudinary account for media hosting
+
+2. Backend Setup
+Bash
 cd backend
 npm install
-Create a .env file using the project's environment example and provide:
-PORT=5000
-NODE_ENV=development
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_secure_jwt_secret
-CLIENT_URL=http://localhost:3000
-
-Then start the backend:
-
+cp .env.example .env
+# Fill in your MONGODB_URI, JWT_SECRET, and Cloudinary credentials
 npm run dev
-
-3. Configure the frontend
-
-Open another terminal:
-
+3. Frontend Setup
+Bash
 cd frontend
 npm install
-Create the frontend environment file:
-
-NEXT_PUBLIC_API_URL=http://localhost:5000/api
-
-Then start the frontend:
-
+cp .env.example .env.local
 npm run dev
-Open: http://localhost:3000
+The application will be live at http://localhost:3000.
 
-🧪 Production Verification
-
-Build the backend:
-cd backend
-npm run build
-
-Build the frontend:
-
-cd ../frontend
-npm run build
-Before deployment, verify:
-Authentication flows
-Protected routes
-Post CRUD
-Markdown rendering
-Code highlighting
-Search and filtering
-Bookmarks
-Profile editing
-Settings/session termination
-Responsive navigation
-Loading, empty, and error states
-
-🎯 V1 Scope
-
-DevPostify Nova V1 is intentionally focused on the core developer publishing experience.
-
-The following features are not part of V1:
-
-Chat
-AI features
-Communities
-GitHub synchronization
-Notifications
-Voice/video
-Realtime features
-
-Keeping these outside V1 allowed the core platform architecture and user experience to remain focused and maintainable.
-
-🔮 Future Direction
-
-Potential post-V1 features include:
-
-Comments and nested discussions
-Technical reactions/upvotes
-Following/follower relationships
-In-app notifications
-GitHub OAuth and repository cards
-Developer portfolio/project showcases
-Advanced developer discovery
-Richer code-sharing experiences
-These are intentionally deferred from the current V1 release.
-
-📌 Engineering Highlights
-
-Some of the main engineering decisions behind the project:
-
-Decoupled Next.js + Express architecture
-REST-based frontend/backend communication
-MongoDB full-text search indexing
-JWT authentication with HTTP-only cookies
-Backend authorization and ownership checks
-Zod-based server validation
-AST-based Markdown rendering
-Prism.js syntax highlighting
-Responsive mobile navigation
-Semantic HTML and accessibility considerations
-Production deployment across Vercel and Render
-TypeScript strict mode across the application
-
-📄 License
-
-This project is licensed under the MIT License.
-
-👨‍💻 Author
-
-Built by Om Baisane as a full-stack engineering project focused on developer experience, production-oriented architecture, and practical software engineering.
-
-DevPostify — Where Developers Build Their Identity
-
+📜 License
+Distributed under the MIT License.
 ```
