@@ -54,7 +54,7 @@ export default function HomePage() {
       }
     };
 
-    loadFeed();
+    void loadFeed();
 
     return () => {
       isMounted = false;
@@ -70,8 +70,10 @@ export default function HomePage() {
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-8">
+      {/* Premium Hero */}
       <HomeHero onExploreClick={scrollToFeed} />
 
+      {/* Feed Stream */}
       <section id="articles-feed" className="scroll-mt-8">
         <div className="mb-8">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
@@ -83,6 +85,7 @@ export default function HomePage() {
           </p>
         </div>
 
+        {/* Category Filter Pills */}
         <nav
           aria-label="Engineering Categories"
           className="flex items-center gap-2 overflow-x-auto pb-3 mb-4 no-scrollbar"
@@ -106,6 +109,7 @@ export default function HomePage() {
           ))}
         </nav>
 
+        {/* Sorting & Active Tag Indicator */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pt-2 border-t border-slate-800/80">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">
@@ -156,6 +160,7 @@ export default function HomePage() {
           )}
         </div>
 
+        {/* Feed Stream */}
         {error && (
           <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-xs text-red-400 mb-6">
             {error}

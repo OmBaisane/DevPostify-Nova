@@ -28,12 +28,24 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  ),
   title: {
     default: "DevPostify — Where Developers Build Their Identity",
     template: "%s | DevPostify",
   },
   description:
-    "Developer-first professional platform to share technical architecture, engineering learnings, and insights.",
+    "Developer-first professional platform to publish technical architecture breakdowns, showcase engineering expertise, and engage in discussions.",
+  keywords: [
+    "developer publishing",
+    "software engineering",
+    "system design",
+    "architecture breakdowns",
+    "webdev",
+    "devops",
+    "ai",
+  ],
   icons: {
     icon: "/brand/devpostify-mark.svg",
   },
@@ -41,7 +53,29 @@ export const metadata: Metadata = {
     title: "DevPostify — Where Developers Build Their Identity",
     description:
       "A modern developer-first platform for sharing technical knowledge, architecture breakdowns, and engineering insights.",
+    url: "/",
+    siteName: "DevPostify",
+    images: [
+      {
+        url: "/brand/devpostify-logo.svg",
+        width: 1200,
+        height: 630,
+        alt: "DevPostify Nova",
+      },
+    ],
+    locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DevPostify — Where Developers Build Their Identity",
+    description:
+      "Developer-first platform to build developer identity and publish engineering insights.",
+    images: ["/brand/devpostify-logo.svg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
