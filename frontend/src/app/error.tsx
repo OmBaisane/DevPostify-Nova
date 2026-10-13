@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 
 export default function GlobalError({
   error,
@@ -11,37 +12,45 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("Global Error Caught:", error);
+    // Log exception safely to client console
+    console.error("Application runtime error:", error);
   }, [error]);
 
   return (
-    <div className="flex min-h-[calc(100vh-8rem)] flex-col items-center justify-center px-4 text-center">
-      <div className="card-surface max-w-md p-8 shadow-2xl border-red-500/20">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-red-500/20 bg-red-500/10 text-red-400">
-          <AlertTriangle className="h-7 w-7" />
+    <main className="min-h-[70vh] flex items-center justify-center px-4 py-16">
+      <div className="card-surface max-w-md w-full p-8 rounded-2xl border border-slate-800 bg-slate-900/60 text-center shadow-2xl">
+        <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto mb-4">
+          <AlertTriangle className="w-6 h-6" />
         </div>
 
-        <span className="font-mono text-xs font-semibold uppercase tracking-wider text-red-400">
-          System Exception
-        </span>
-        <h1 className="mt-2 font-heading text-2xl font-bold text-slate-100 sm:text-3xl">
-          Something went wrong
+        <h1 className="text-xl font-bold text-slate-100 mb-2">
+          An Unexpected Error Occurred
         </h1>
-        <p className="mt-2 text-xs leading-relaxed text-slate-400">
-          An unhandled error occurred while processing client hydration. Try
-          re-executing the action.
+
+        <p className="text-xs text-slate-400 mb-6 leading-relaxed">
+          {error.message ||
+            "Something went wrong while rendering this section. Our runtime caught the issue safely."}
         </p>
 
-        <div className="mt-6">
+        <div className="flex items-center justify-center gap-3">
           <button
+            type="button"
             onClick={() => reset()}
-            className="btn-primary inline-flex items-center gap-2 px-5 py-2.5 text-xs font-medium shadow-md shadow-blue-600/20"
+            className="btn-primary px-4 py-2 text-xs font-semibold inline-flex items-center gap-2"
           >
-            <RefreshCw className="h-3.5 w-3.5" />
+            <RefreshCw className="w-3.5 h-3.5" />
             <span>Try Again</span>
           </button>
+
+          <Link
+            href="/"
+            className="px-4 py-2 rounded-xl border border-slate-800 bg-slate-900 text-xs text-slate-300 hover:text-white hover:border-slate-700 font-semibold inline-flex items-center gap-2 transition"
+          >
+            <Home className="w-3.5 h-3.5 text-blue-400" />
+            <span>Feed Home</span>
+          </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
