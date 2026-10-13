@@ -58,7 +58,7 @@ export const verifyRequestOrigin = (
   }
 
   const origin = req.headers.origin || req.headers.referer;
-  if (!origin) {
+  if (!origin || typeof origin !== "string") {
     res.status(403).json({
       success: false,
       message: "Forbidden: Missing request origin header",
@@ -66,17 +66,23 @@ export const verifyRequestOrigin = (
     return;
   }
 
-  // Match with configured CLIENT_URL
-  const allowedOrigin = env.CLIENT_URL ? new URL(env.CLIENT_URL).origin : "";
-  const requestOrigin = new URL(origin).origin;
+  try {
+    const allowedOrigin = env.CLIENT_URL ? new URL(env.CLIENT_URL).origin : "";
+    const requestOrigin = new URL(origin).origin;
 
-  if (allowedOrigin && requestOrigin !== allowedOrigin) {
+    if (allowedOrigin && requestOrigin !== allowedOrigin) {
+      res.status(403).json({
+        success: false,
+        message: "Forbidden: Cross-site request rejected",
+      });
+      return;
+    }
+
+    next();
+  } catch {
     res.status(403).json({
       success: false,
-      message: "Forbidden: Cross-site request rejected",
+      message: "Forbidden: Malformed request origin header",
     });
-    return;
   }
-
-  next();
 };

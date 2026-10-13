@@ -26,16 +26,7 @@ function CardBookmarkAction({
   onRemoved?: (id: string) => void;
 }) {
   const { user } = useAuth();
-  const toastContext = useToast();
-  const triggerToast = (
-    msg: string,
-    type: "success" | "error" | "info" = "info",
-  ) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const ctx = toastContext as any;
-    if (typeof ctx.toast === "function") ctx.toast(msg, type);
-    else if (typeof ctx.addToast === "function") ctx.addToast(msg, type);
-  };
+  const { toast } = useToast();
 
   const [bookmarked, setBookmarked] = useState(initialBookmarked);
   const [loading, setLoading] = useState(false);
@@ -45,7 +36,7 @@ function CardBookmarkAction({
     e.stopPropagation();
 
     if (!user) {
-      triggerToast("Please log in to save bookmarks", "info");
+      toast("Please log in to save bookmarks", "info");
       return;
     }
 
@@ -58,17 +49,17 @@ function CardBookmarkAction({
       setLoading(true);
       if (prevState) {
         await api.delete(`/bookmarks/${postId}`);
-        triggerToast("Removed from bookmarks", "info");
+        toast("Removed from bookmarks", "info");
         if (onRemoved) onRemoved(postId);
       } else {
         await api.post(`/bookmarks/${postId}`);
-        triggerToast("Saved to bookmarks", "success");
+        toast("Saved to bookmarks", "success");
       }
     } catch (err: unknown) {
       setBookmarked(prevState);
       const msg =
         err instanceof ApiError ? err.message : "Failed to update bookmark";
-      triggerToast(msg, "error");
+      toast(msg, "error");
     } finally {
       setLoading(false);
     }

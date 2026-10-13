@@ -23,12 +23,18 @@ import {
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const pathname = usePathname();
 
+  // Close mobile drawer on route change without cascading renders
   useEffect(() => {
-    setIsOpen(false);
+    const timer = setTimeout(() => {
+      setIsOpen(false);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [pathname]);
 
+  // Lock body scroll when mobile drawer is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -40,6 +46,7 @@ export default function Navbar() {
     };
   }, [isOpen]);
 
+  // Escape key handler to close drawer
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsOpen(false);
@@ -48,11 +55,11 @@ export default function Navbar() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const [unreadCount, setUnreadCount] = useState(0);
-
+  // Fetch unread notifications count safely
   useEffect(() => {
+    let isMounted = true;
+
     if (!user) {
-      setUnreadCount(0);
       return;
     }
 
@@ -61,7 +68,7 @@ export default function Navbar() {
         const res = await api.get<{ count: number }>(
           "/notifications/unread-count",
         );
-        if (typeof res.data?.count === "number") {
+        if (isMounted && typeof res.data?.count === "number") {
           setUnreadCount(res.data.count);
         }
       } catch {
@@ -69,7 +76,11 @@ export default function Navbar() {
       }
     };
 
-    fetchUnread();
+    void fetchUnread();
+
+    return () => {
+      isMounted = false;
+    };
   }, [user, pathname]);
 
   return (

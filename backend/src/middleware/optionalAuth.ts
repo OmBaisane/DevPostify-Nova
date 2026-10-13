@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
+import { AUTH_COOKIE_NAME } from "../constants/auth.js";
 
 interface JwtPayload {
   userId: string;
@@ -11,9 +12,10 @@ export const optionalAuth = (
   _res: Response,
   next: NextFunction,
 ): void => {
-  const token = req.cookies?.token;
+  const token = req.cookies?.[AUTH_COOKIE_NAME];
 
   if (!token || typeof token !== "string") {
+    req.userId = undefined;
     return next();
   }
 

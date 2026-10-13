@@ -1,4 +1,4 @@
-import { api, ApiError } from "./api";
+import { api } from "./api";
 
 interface SignatureResponse {
   timestamp: number;

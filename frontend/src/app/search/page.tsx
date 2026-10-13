@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   Search as SearchIcon,
   Calendar,
-  Clock,
   Loader2,
   ArrowRight,
 } from "lucide-react";

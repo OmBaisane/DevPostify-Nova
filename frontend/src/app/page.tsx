@@ -21,45 +21,44 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Discovery Filters
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"latest" | "top">("latest");
 
-  const fetchPosts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const params: Record<string, string> = {
-        sort: sortBy,
-      };
-
-      if (selectedCategory !== "All") {
-        params.category = selectedCategory;
-      }
-
-      if (selectedTag) {
-        params.tag = selectedTag;
-      }
-
-      const res = await api.get<PostsResponseData>("/posts", { params });
-      if (res.data) {
-        setPosts(res.data.posts || []);
-      }
-    } catch (err: unknown) {
-      if (err instanceof ApiError) {
-        setError(err.message);
-      } else {
-        setError("Failed to fetch technical feed");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchPosts();
+    let isMounted = true;
+
+    const loadFeed = async () => {
+      try {
+        setError(null);
+        const params: Record<string, string> = { sort: sortBy };
+        if (selectedCategory !== "All") params.category = selectedCategory;
+        if (selectedTag) params.tag = selectedTag;
+
+        const res = await api.get<PostsResponseData>("/posts", { params });
+        if (isMounted && res.data) {
+          setPosts(res.data.posts || []);
+        }
+      } catch (err: unknown) {
+        if (isMounted) {
+          if (err instanceof ApiError) {
+            setError(err.message);
+          } else {
+            setError("Failed to fetch technical feed");
+          }
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadFeed();
+
+    return () => {
+      isMounted = false;
+    };
   }, [selectedCategory, selectedTag, sortBy]);
 
   const scrollToFeed = () => {
@@ -71,12 +70,9 @@ export default function HomePage() {
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-8">
-      {/* Premium Hero */}
       <HomeHero onExploreClick={scrollToFeed} />
 
-      {/* Articles Feed Target Section */}
       <section id="articles-feed" className="scroll-mt-8">
-        {/* Feed Header */}
         <div className="mb-8">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight">
             Engineering Insights
@@ -87,7 +83,6 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Category Pills Bar */}
         <nav
           aria-label="Engineering Categories"
           className="flex items-center gap-2 overflow-x-auto pb-3 mb-4 no-scrollbar"
@@ -98,7 +93,7 @@ export default function HomePage() {
               type="button"
               onClick={() => {
                 setSelectedCategory(cat);
-                setSelectedTag(null); // Reset tag on category shift
+                setSelectedTag(null);
               }}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
                 selectedCategory === cat
@@ -111,7 +106,6 @@ export default function HomePage() {
           ))}
         </nav>
 
-        {/* Discovery Sub-Bar: Sort Controls (Latest vs Top) & Active Tag Pill */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pt-2 border-t border-slate-800/80">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-mono text-slate-500 uppercase tracking-wider">
@@ -146,7 +140,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Active Tag Indicator */}
           {selectedTag && (
             <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-purple-500/30 bg-purple-500/10 text-xs text-purple-300">
               <Tag className="w-3 h-3" />
@@ -163,7 +156,6 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Feed Content Stream */}
         {error && (
           <div className="p-4 rounded-xl border border-red-500/30 bg-red-500/10 text-xs text-red-400 mb-6">
             {error}

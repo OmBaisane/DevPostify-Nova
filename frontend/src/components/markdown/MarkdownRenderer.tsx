@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Copy, Check } from "lucide-react";
@@ -30,19 +30,17 @@ interface CodeBlockProps {
 
 function CodeBlock({ language, code }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
-  const [highlightedCode, setHighlightedCode] = useState<string>("");
 
-  useEffect(() => {
+  const highlightedCode = React.useMemo(() => {
     const lang = language.toLowerCase();
     if (Prism.languages[lang]) {
       try {
-        setHighlightedCode(Prism.highlight(code, Prism.languages[lang], lang));
+        return Prism.highlight(code, Prism.languages[lang], lang);
       } catch {
-        setHighlightedCode("");
+        return "";
       }
-    } else {
-      setHighlightedCode("");
     }
+    return "";
   }, [code, language]);
 
   const handleCopy = async () => {

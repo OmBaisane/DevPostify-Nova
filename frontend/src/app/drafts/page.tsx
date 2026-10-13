@@ -29,25 +29,34 @@ export default function DraftsPage() {
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
-  const fetchDrafts = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get<DraftsResponseData>("/posts/my/drafts");
-      if (res.data) {
-        setDrafts(res.data.drafts || []);
-      }
-    } catch (err: unknown) {
-      const msg =
-        err instanceof ApiError ? err.message : "Failed to load drafts";
-      toast(msg, "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchDrafts();
-  }, []);
+    let isMounted = true;
+
+    const loadDrafts = async () => {
+      try {
+        const res = await api.get<DraftsResponseData>("/posts/my/drafts");
+        if (isMounted && res.data) {
+          setDrafts(res.data.drafts || []);
+        }
+      } catch (err: unknown) {
+        if (isMounted) {
+          const msg =
+            err instanceof ApiError ? err.message : "Failed to load drafts";
+          toast(msg, "error");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadDrafts();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [toast]);
 
   const handlePublish = async (postId: string) => {
     try {

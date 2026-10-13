@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -9,7 +9,6 @@ import {
   MessageSquare,
   CheckCheck,
   Clock,
-  User as UserIcon,
   Loader2,
   Inbox,
   ArrowRight,
@@ -44,6 +43,23 @@ interface NotificationsResponseData {
   total: number;
 }
 
+function formatNotificationTime(dateStr: string) {
+  const past = new Date(dateStr).getTime();
+  const diff = Date.now() - past;
+  const minutes = Math.floor(diff / (1000 * 60));
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  if (days < 7) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
 export default function NotificationsPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -52,25 +68,36 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [markingAll, setMarkingAll] = useState(false);
 
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get<NotificationsResponseData>("/notifications");
-      if (res.data) {
-        setNotifications(res.data.notifications || []);
-      }
-    } catch (err: unknown) {
-      const msg =
-        err instanceof ApiError ? err.message : "Failed to load notifications";
-      toast(msg, "error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    let isMounted = true;
+
+    const loadNotifications = async () => {
+      try {
+        const res = await api.get<NotificationsResponseData>("/notifications");
+        if (isMounted && res.data) {
+          setNotifications(res.data.notifications || []);
+        }
+      } catch (err: unknown) {
+        if (isMounted) {
+          const msg =
+            err instanceof ApiError
+              ? err.message
+              : "Failed to load notifications";
+          toast(msg, "error");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadNotifications();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [toast]);
 
   const handleMarkAsRead = async (id: string, redirectUrl?: string) => {
     try {
@@ -105,28 +132,11 @@ export default function NotificationsPage() {
     }
   };
 
-  const formatRelativeTime = (dateStr: string) => {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(minutes / 60);
-    const days = Math.floor(hours / 24);
-
-    if (minutes < 1) return "just now";
-    if (minutes < 60) return `${minutes}m ago`;
-    if (hours < 24) return `${hours}h ago`;
-    if (days < 7) return `${days}d ago`;
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
     <ProtectedRoute>
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
@@ -165,7 +175,6 @@ export default function NotificationsPage() {
           )}
         </div>
 
-        {/* Content */}
         {loading ? (
           <div className="space-y-3 animate-pulse">
             <div className="h-20 bg-slate-900/40 rounded-2xl border border-slate-800" />
@@ -208,7 +217,6 @@ export default function NotificationsPage() {
                   }`}
                 >
                   <div className="flex items-start gap-3.5 min-w-0">
-                    {/* Icon indicator */}
                     <div
                       className={`p-2 rounded-xl shrink-0 mt-0.5 ${
                         item.type === "reaction"
@@ -223,7 +231,6 @@ export default function NotificationsPage() {
                       )}
                     </div>
 
-                    {/* Sender & Context */}
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         {item.sender ? (
@@ -243,7 +250,6 @@ export default function NotificationsPage() {
                         </span>
                       </div>
 
-                      {/* Post Title Context */}
                       {item.post ? (
                         <p className="text-xs font-medium text-slate-300 mt-1 truncate max-w-xl">
                           &quot;{item.post.title}&quot;
@@ -254,7 +260,6 @@ export default function NotificationsPage() {
                         </p>
                       )}
 
-                      {/* Comment Preview Snippet */}
                       {item.type === "comment" && item.comment?.content && (
                         <p className="text-[11px] text-slate-400 font-mono mt-1.5 p-2 rounded-lg bg-slate-950/60 border border-slate-800 line-clamp-2">
                           &ldquo;{item.comment.content}&rdquo;
@@ -263,12 +268,11 @@ export default function NotificationsPage() {
 
                       <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-mono mt-2">
                         <Clock className="w-3 h-3" />
-                        <span>{formatRelativeTime(item.createdAt)}</span>
+                        <span>{formatNotificationTime(item.createdAt)}</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right Action */}
                   <div className="shrink-0 flex items-center gap-2">
                     {!item.read && (
                       <span className="w-2 h-2 rounded-full bg-blue-500" />

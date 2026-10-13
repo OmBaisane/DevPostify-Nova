@@ -49,7 +49,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    refreshUser();
+    let isMounted = true;
+    const initAuth = async () => {
+      try {
+        const response = await api.get<AuthResponseData>("/auth/me");
+        if (isMounted) {
+          if (response.data?.user) {
+            setUser(response.data.user);
+          } else {
+            setUser(null);
+          }
+        }
+      } catch {
+        if (isMounted) setUser(null);
+      } finally {
+        if (isMounted) setLoading(false);
+      }
+    };
+
+    initAuth();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const login = async (credentials: LoginCredentials) => {

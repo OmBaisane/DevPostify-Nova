@@ -2,8 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { env } from "../config/env";
 import { UserModel } from "../models/User";
-
-const COOKIE_NAME = "devpostify_token";
+import { AUTH_COOKIE_NAME } from "../constants/auth.js";
 
 interface AuthPayload {
   userId: string;
@@ -29,7 +28,7 @@ export const requireAuth = async (
   next: NextFunction,
 ) => {
   try {
-    const token = req.cookies?.[COOKIE_NAME];
+    const token = req.cookies?.[AUTH_COOKIE_NAME];
 
     if (!token) {
       return res.status(401).json({

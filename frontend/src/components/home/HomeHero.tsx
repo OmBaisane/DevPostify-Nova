@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { Sparkles, ArrowDown, PenTool, ArrowRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";

@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function PostSkeleton() {
   return (
     <div className="card-surface p-5 sm:p-6 animate-pulse space-y-4">
