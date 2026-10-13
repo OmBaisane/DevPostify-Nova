@@ -80,16 +80,22 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsOpen(true)}
-              aria-label="Open menu"
-              className="inline-flex md:hidden items-center justify-center h-9 w-9 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:text-white transition"
+              aria-label="Open mobile navigation menu"
+              aria-expanded={isOpen}
+              aria-controls="mobile-drawer"
+              className="inline-flex md:hidden items-center justify-center h-9 w-9 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <Menu className="h-5 w-5" />
             </button>
 
-            <Link href="/" className="flex items-center gap-2.5">
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-0.5"
+              aria-label="DevPostify Home"
+            >
               <Image
                 src="/brand/devpostify-mark.svg"
-                alt="DevPostify"
+                alt="DevPostify Logo"
                 width={28}
                 height={28}
                 priority
@@ -154,6 +160,7 @@ export default function Navbar() {
                 <Link
                   href={`/profile/${user.username}`}
                   className="inline-flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-1.5 text-xs font-medium text-slate-200 hover:border-slate-700 transition"
+                  aria-label={`Profile of ${user.username}`}
                 >
                   <UserIcon className="h-3.5 w-3.5 text-blue-400" />
                   <span>{user.username}</span>
@@ -161,7 +168,11 @@ export default function Navbar() {
 
                 <Link
                   href="/notifications"
-                  aria-label="Notifications"
+                  aria-label={
+                    unreadCount > 0
+                      ? `Notifications, ${unreadCount} unread`
+                      : "Notifications"
+                  }
                   className="relative p-2 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-white hover:border-slate-700 transition"
                 >
                   <Bell className="w-4 h-4" />
@@ -173,6 +184,7 @@ export default function Navbar() {
                 </Link>
 
                 <button
+                  type="button"
                   onClick={logout}
                   className="inline-flex items-center justify-center h-9 w-9 rounded-xl border border-slate-800 bg-slate-900/60 text-slate-400 hover:text-red-400 hover:border-slate-700 transition"
                   title="Log out"
@@ -203,7 +215,7 @@ export default function Navbar() {
           <div className="flex md:hidden items-center">
             <Link
               href="/search"
-              aria-label="Search"
+              aria-label="Search Insights"
               className="inline-flex items-center justify-center h-9 w-9 rounded-xl border border-slate-800 bg-slate-900 text-slate-300 hover:text-white transition"
             >
               <Search className="h-4 w-4" />
@@ -214,6 +226,7 @@ export default function Navbar() {
 
       {/* Solid Left-Side Mobile Drawer */}
       <div
+        id="mobile-drawer"
         className={`fixed inset-0 z-50 md:hidden transition-opacity duration-300 ${
           isOpen
             ? "opacity-100 pointer-events-auto"
@@ -221,14 +234,16 @@ export default function Navbar() {
         }`}
         role="dialog"
         aria-modal="true"
+        aria-label="Mobile Navigation"
       >
         <div
           className="absolute inset-0 bg-black/80 backdrop-blur-sm"
           onClick={() => setIsOpen(false)}
+          aria-hidden="true"
         />
 
         <aside
-          className={`absolute inset-y-0 left-0 flex h-full w-70 max-w-[85vw] flex-col border-r border-slate-800 bg-slate-950 p-5 shadow-2xl transition-transform duration-300 ease-in-out ${
+          className={`absolute inset-y-0 left-0 flex h-full w-72 max-w-[85vw] flex-col border-r border-slate-800 bg-slate-950 p-5 shadow-2xl transition-transform duration-300 ease-in-out ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -236,7 +251,7 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               <Image
                 src="/brand/devpostify-mark.svg"
-                alt="DevPostify"
+                alt="DevPostify Logo"
                 width={24}
                 height={24}
               />
@@ -245,15 +260,19 @@ export default function Navbar() {
               </span>
             </div>
             <button
+              type="button"
               onClick={() => setIsOpen(false)}
               aria-label="Close menu"
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-900 hover:text-white transition"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-900 hover:text-white transition focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <nav className="mt-5 flex-1 overflow-y-auto space-y-2">
+          <nav
+            aria-label="Mobile Drawer Navigation"
+            className="mt-5 flex-1 overflow-y-auto space-y-2"
+          >
             {user ? (
               <>
                 <Link
@@ -275,7 +294,7 @@ export default function Navbar() {
 
                 <Link
                   href="/create"
-                  className="flex items-center justify-center gap-2 btn-primary w-full py-2.5 text-sm font-medium shadow-md shadow-blue-600/20 my-4!"
+                  className="flex items-center justify-center gap-2 btn-primary w-full py-2.5 text-sm font-medium shadow-md shadow-blue-600/20 my-4"
                 >
                   <PenSquare className="h-4 w-4" />
                   Write Post
@@ -361,6 +380,7 @@ export default function Navbar() {
           {user && (
             <div className="border-t border-slate-800/80 pt-3">
               <button
+                type="button"
                 onClick={() => {
                   setIsOpen(false);
                   logout();
