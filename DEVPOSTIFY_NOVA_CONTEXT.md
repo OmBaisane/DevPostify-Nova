@@ -40,7 +40,7 @@
 - Register with 8+ character password and alphanumeric username constraints
 - Login using email or username
 - Logout
-- JWT authentication using cross-domain HttpOnly cookies
+- JWT authentication using cross-domain HttpOnly cookies (`devpostify_token`)
 - Protected routes
 
 ### Developer Profiles
@@ -61,7 +61,7 @@
 
 ### Engagement
 
-- Post reaction toggle and counters
+- Post reaction toggle and counters (atomic concurrency protected)
 - Flat, single-level comments
 - Author-only comment deletion
 - Optimistic reaction/comment UI
@@ -72,9 +72,7 @@
 - Navbar unread badge
 - `/notifications` activity feed
 - Mark one/all as read
-- Deep links
-
-**Accuracy note:** Do not describe notifications as WebSocket/realtime-powered. There is no realtime socket system in V1.1; describe the actual refresh/polling behavior accurately.
+- Deep links (polling/request-driven, no WebSockets)
 
 ### Discovery and Bookmarks
 
@@ -86,9 +84,9 @@
 
 ### Settings and UX
 
-- Dark mode as the locked default
+- Dark mode as the locked default (`#020617`)
 - Account overview/session termination
-- Responsive navigation and mobile drawer
+- Accessible navigation and mobile drawer with aria attributes and scroll locking
 - Loading/skeleton, empty, error boundaries (`error.tsx`), 404 (`not-found.tsx`), and toast states
 
 ---
@@ -131,13 +129,13 @@ users: credentials, bio, avatar, skills, specialties, socials
 
 posts: content, category, tags, cover image, isDraft, reaction/comment counters, author
 
-bookmarks: user/post references; unique compound index
+bookmarks: user/post references; unique compound index { user: 1, post: 1 }
 
-reactions: user/post references; unique compound index
+reactions: user/post references; unique compound index { user: 1, post: 1 }
 
 comments: post, author, content; index { post: 1, createdAt: -1 }
 
-notifications: recipient, sender, type (reaction | comment), post/comment references, read
+notifications: recipient, sender, type (reaction | comment), post/comment references, isRead
 
 8. REST API Inventory
 Auth: POST /api/auth/register, POST /api/auth/login, POST /api/auth/logout, GET /api/auth/me
@@ -172,13 +170,13 @@ Milestone 30 — Draft Management Workflow
 COMPLETE & VERIFIED. Dedicated protected /drafts route with edit, publish, and delete actions restricted strictly to the author.
 
 Milestone 31 — Delete / Cascade Integrity
-COMPLETE & VERIFIED. Deleting posts cleans dependent reactions, comments, bookmarks, and notifications safely.
+COMPLETE & VERIFIED. Deleting posts cleans dependent reactions, comments, bookmarks, and notifications safely with atomic transactions.
 
 Milestone 32 — Reaction / Comment Concurrency & Consistency
-COMPLETE & VERIFIED. Atomic operations ($inc), unique constraints, and synchronized counters prevent race conditions.
+COMPLETE & VERIFIED. Atomic operations ($inc), unique compound indexes, and synchronized counts prevent race conditions.
 
 Milestone 33 — TypeScript and Code Quality
-COMPLETE & VERIFIED. Removed as any bypasses across ToastContext, ReactionButton, CommentSection, drafts, and post pages. Both frontend and backend compile strictly.
+COMPLETE & VERIFIED. Removed explicit as any type bypasses across components. Both frontend and backend compile strictly.
 
 Milestone 34 — Upload & Input Validation Hardening
 COMPLETE & VERIFIED. Cloudinary signed upload restricted to whitelisted folders (devpostify/covers, devpostify/avatars). Tags normalized (max 5, max 30 chars, lowercase, alphanumeric/dashes). Safe URL boundaries enforced.
@@ -189,55 +187,27 @@ COMPLETE & VERIFIED. Mounted helmet, configured express-rate-limit (general, aut
 Milestone 36 — Notification Reliability and UX
 COMPLETE & VERIFIED. Click-to-read routing, semantic reaction vs comment styling, archived post fallbacks, and unread counters verified.
 
-10. Remaining Execution Roadmap
-Milestone 37 — Premium Home Hero (CURRENT NEXT)
-Improve first impression of home/feed page while preserving feed usability.
+Milestone 37 — Premium Home Hero
+COMPLETE & VERIFIED. Added SaaS-level hero with ambient glow, capability strip, and smooth #articles-feed anchor navigation without feed disruption.
 
-Locked Copy:
+Milestone 38 — Documentation, Env Contracts & Licensing
+COMPLETE & VERIFIED. Root README.md synchronized with exact architecture and REST API inventory, added root LICENSE (MIT), and verified .env.example configurations.
 
-Eyebrow: DEVELOPER-FIRST ENGINEERING PLATFORM
-
-Headline: Where Developers Build Their Identity.
-
-Supporting copy: Publish technical knowledge, showcase your expertise, and discover engineering insights built for developers.
-
-Logged-out CTAs: Explore Insights, Get Started
-
-Logged-in CTAs: Explore Insights, Write an Article
-
-Capability strip: Technical Publishing • Developer Profiles • Engineering Discussions
-
-Design: Dark surface, restrained blue/violet glow, JetBrains Mono tags, clean hierarchy, responsive. No fake stats/testimonials.
-
-Milestone 38 — README, Environment Example & License
-Update root README with actual architecture, verified REST endpoints, and screenshots/specs.
-
-Ensure backend/.env.example has all Cloudinary, JWT, Mongo, Client URL keys.
-
-Add standard root MIT LICENSE and sync package.json metadata.
-
-Milestone 39 — Responsive and Accessibility Audit
-Audit desktop/tablet/mobile screens.
-
-Verify semantic landmarks (single main landmark, no nesting), button labels, focus rings, keyboard navigability, image alts, toast accessibility.
-
-Check mobile drawer transitions and scroll locks.
+Milestone 39 — Responsive and Accessibility (A11y) Audit
+COMPLETE & VERIFIED. Audited semantic landmarks, added aria-expanded and aria-controls to mobile menu toggle, enforced aria-label="Mobile Navigation", and polished escape-key handling and body scroll locking.
 
 Milestone 40 — Full Verification & Pre-Release Run
-Run full checks across both workspaces:
+COMPLETE & VERIFIED. Ran clean npm run type-check and npm run build on backend (0 errors). Ran clean npm run lint and npm run build on frontend (0 errors, 0 warnings). OpenGraph, Twitter cards, metadata base, and production asset optimizations verified.
 
-Frontend: npm run lint, npm run build
-
-Backend: npm run type-check, npm run build
-
-Smoke test critical flows: auth, posting, drafting, reactions, comments, search, bookmarks, profiles.
-
-Milestone 41 — Production Release & V1.1 Freeze 🔒
+10. Next Milestone
+Milestone 41 — Production Release & V1.1 Freeze 🔒 (NEXT)
 Deploy backend to Render and frontend to Vercel.
 
-Verify production environment variables and cross-domain HttpOnly cookie delivery.
+Verify production environment variables (CLIENT_URL, MONGODB_URI, JWT_SECRET, CLOUDINARY_*, NEXT_PUBLIC_API_URL).
+
+Verify cross-domain HttpOnly cookie delivery in production browsers.
 
 Smoke test live URLs.
 
-Mark DEVPOSTIFY NOVA V1.1 — COMPLETE / FROZEN.
+Mark DEVPOSTIFY NOVA V1.1 — COMPLETE & FROZEN.
 ```
