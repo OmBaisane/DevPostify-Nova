@@ -1,147 +1,243 @@
-# DevPostify Nova
+DevPostify Nova
 
-> Where Developers Build Their Identity.
+«Where Developers Build Their Identity.»
 
-DevPostify Nova is a developer-first professional technical publishing and identity platform. It is engineered to help software engineers publish deep-dive architectural insights, showcase verified project expertise, engage in focused technical discussions, and curate bookmarks.
+DevPostify Nova is a developer-first professional technical publishing and identity platform built to help developers share technical knowledge, showcase their expertise, participate in focused discussions, discover useful content, and curate valuable posts.
 
----
+The project focuses on a polished developer experience, maintainable architecture, secure authentication, and practical full-stack engineering.
 
-## ⚡ Core Features (V1.1)
+✨ Core Features
 
-- **Authentication & Security:**
-  - Secure credential registration and login with username or email.
-  - Cross-domain HttpOnly cookie authentication powered by JSON Web Tokens (JWT).
-  - Production-grade security headers with Helmet and strict origin verification on state mutations.
-  - Tiered rate-limiting on sensitive authentication and media upload endpoints.
+Authentication & Security
 
-- **Technical Publishing & Draft Workflow:**
-  - Markdown editor with live Write / Preview modes (`react-markdown`, `remark-gfm`, Prism syntax highlighting).
-  - Five locked technical domains: `webdev`, `architecture`, `devops`, `opensource`, `ai`.
-  - Secure, signed Cloudinary cover-image upload pipeline.
-  - Private drafts isolated at the database level with a dedicated `/drafts` management dashboard.
+- Register and sign in using email or username.
+- JWT-based authentication using cross-domain HttpOnly cookies.
+- Security headers powered by Helmet.
+- Origin verification for state-changing requests.
+- Rate limiting for general API traffic, authentication, and media uploads.
 
-- **Developer Identity & Profiles:**
-  - Custom developer profiles indexed by `@username`.
-  - Showcase technical specialties, core skills, GitHub, LinkedIn, and personal websites.
-  - Avatar uploads powered by Cloudinary with client/server validation.
+Technical Publishing
 
-- **Engineering Engagement & Discussions:**
-  - Race-safe, atomic post reactions with optimistic UI updates.
-  - Flat, single-level technical discussion threads with author deletion privileges.
-  - Persistent notification stream with deep linking and unread badge counters.
+- Create, edit, view, and delete technical posts.
+- Markdown editor with Write and Preview modes.
+- GitHub Flavored Markdown and syntax highlighting.
+- Five supported categories: "webdev", "architecture", "devops", "opensource", and "ai".
+- Cover-image uploads through signed Cloudinary uploads.
+- Private drafts with a dedicated draft-management dashboard.
 
-- **Discovery & Discovery Controls:**
-  - Sort by Latest or Top Insights.
-  - Category tabs and tag filtering.
-  - ReDoS-protected search with strict input boundaries and regex escaping.
-  - Instant post bookmarking with dedicated `/bookmarks` view.
+Developer Profiles
 
----
+- Public developer profiles accessible by username.
+- Profile editing for bio, skills, specialties, and social links.
+- GitHub, LinkedIn, and personal website links.
+- Cloudinary-powered avatar uploads.
+- Published-post listings on developer profiles.
 
-## 🛠️ Architecture & Tech Stack
+Engagement & Notifications
 
-```text
-Next.js 15 (App Router, React 19)
-       │
-       │  HTTPS REST API (HttpOnly Cookies, CORS, Rate Limited)
-       ▼
-Express Backend (Node.js, TypeScript)
-       │
-       │  Mongoose ODM
-       ▼
-MongoDB Atlas  ◄─── Signed Uploads ───►  Cloudinary CDN
-Frontend: Next.js (App Router), React 19, Strict TypeScript, Tailwind CSS, Lucide React.
+- Post reactions with optimistic UI updates.
+- Flat, single-level comment discussions.
+- Author-only comment deletion.
+- Persistent reaction and comment notifications.
+- Unread notification counts and mark-as-read actions.
+- Notification links to relevant posts.
 
-Backend: Node.js, Express, TypeScript, Mongoose, Zod, Helmet, express-rate-limit.
+Discovery & Bookmarks
 
-Database: MongoDB Atlas.
+- Latest and Top Insights feed sorting.
+- Category and tag filtering.
+- Search with input validation and regex safeguards.
+- Bookmark and unbookmark functionality.
+- Dedicated bookmarks page.
 
-Media Pipeline: Cloudinary Signed Uploads.
+User Experience
 
-Deployment: Vercel (Frontend), Render (Backend).
+- Dark-mode-first visual design.
+- Responsive layouts and mobile navigation.
+- Loading skeletons, empty states, error handling, and toast feedback.
+- Accessible navigation controls and keyboard interactions.
 
-📡 REST API Inventory
+🛠️ Tech Stack
+
+Layer| Technologies
+Frontend| Next.js 16 (App Router), React 19, TypeScript
+Styling & UI| Tailwind CSS 4, Lucide React
+Markdown| "react-markdown", "remark-gfm", Prism syntax highlighting
+Backend| Node.js, Express 5, TypeScript
+Validation & Security| Zod, JWT, "cookie-parser", Helmet, "express-rate-limit"
+Database| MongoDB Atlas, Mongoose
+Media| Cloudinary
+Frontend Deployment| Vercel
+Backend Deployment| Render
+
+🏗️ Architecture
+
+┌─────────────────────────────────┐
+│ Next.js Frontend │
+│ React + TypeScript │
+└────────────────┬────────────────┘
+│
+│ HTTPS REST API
+│ HttpOnly Cookies + CORS
+▼
+┌─────────────────────────────────┐
+│ Express Backend │
+│ TypeScript + Mongoose │
+└───────────┬─────────────┬───────┘
+│ │
+▼ ▼
+┌──────────────────┐ ┌──────────────────┐
+│ MongoDB Atlas │ │ Cloudinary CDN │
+│ Application Data│ │ Media Uploads │
+└──────────────────┘ └──────────────────┘
+
+📡 REST API Overview
+
+All routes below use the "/api" prefix.
+
 Authentication
-POST /api/auth/register — Create account
 
-POST /api/auth/login — Sign in and issue HttpOnly cookie
+Method| Endpoint| Purpose
+POST| "/auth/register"| Create an account
+POST| "/auth/login"| Sign in
+POST| "/auth/logout"| Clear the session cookie
+GET| "/auth/me"| Retrieve the current authenticated user
 
-POST /api/auth/logout — Invalidate session cookie
+Posts
 
-GET  /api/auth/me — Restore current authenticated user
+Method| Endpoint| Purpose
+GET| "/posts"| Retrieve the published feed
+GET| "/posts/:id"| Retrieve a post, subject to access rules
+POST| "/posts"| Create a post or draft
+PATCH| "/posts/:id"| Update a post or publish a draft
+DELETE| "/posts/:id"| Delete a post and its dependent records
 
-Technical Posts
-GET    /api/posts — Fetch published feed (supports category, tag, sort)
+The feed supports discovery options such as category, tag, and sorting where applicable.
 
-GET    /api/posts/:id — Fetch post detail (auth-aware draft access)
+Reactions & Comments
 
-POST   /api/posts — Create publication or draft
+Method| Endpoint| Purpose
+POST| "/posts/:id/react"| Toggle a reaction
+GET| "/posts/:id/react"| Retrieve the current user's reaction status
+GET| "/posts/:id/comments"| Retrieve post comments
+POST| "/posts/:id/comments"| Add a comment
+DELETE| "/comments/:commentId"| Delete an eligible comment
 
-PATCH  /api/posts/:id — Update post or publish draft
+Developer Profiles
 
-DELETE /api/posts/:id — Cascade delete post and dependent relations
-
-Reactions & Discussions
-POST   /api/posts/:id/react — Atomic toggle reaction
-
-GET    /api/posts/:id/react — Check reaction status
-
-GET    /api/posts/:id/comments — Fetch post comments
-
-POST   /api/posts/:id/comments — Add comment
-
-DELETE /api/comments/:commentId — Delete comment (author-only)
-
-Developer Profile
-GET   /api/profile/:username — Fetch developer profile and publications
-
-PATCH /api/profile — Update bio, skills, specialties, and socials
+Method| Endpoint| Purpose
+GET| "/profile/:username"| Retrieve a developer profile
+PATCH| "/profile"| Update the authenticated user's profile
 
 Notifications & Bookmarks
-GET   /api/notifications — Fetch notification stream
 
-GET   /api/notifications/unread-count — Unread count for navbar badge
+Method| Endpoint| Purpose
+GET| "/notifications"| Retrieve notifications
+GET| "/notifications/unread-count"| Retrieve the unread count
+PATCH| "/notifications/:id/read"| Mark a notification as read
+PATCH| "/notifications/read-all"| Mark all notifications as read
+GET| "/bookmarks"| Retrieve bookmarked posts
+POST| "/bookmarks/:postId"| Bookmark a post
+DELETE| "/bookmarks/:postId"| Remove a bookmark
 
-PATCH /api/notifications/:id/read — Mark notification read
+Search, Media & Health
 
-PATCH /api/notifications/read-all — Mark all notifications read
-
-GET   /api/bookmarks — List bookmarked articles
-
-POST  /api/bookmarks/:postId — Bookmark article
-
-DELETE /api/bookmarks/:postId — Remove bookmark
-
-System & Media
-POST /api/upload/signature — Generate signed Cloudinary upload params
-
-GET  /api/search — ReDoS-protected fuzzy search
-
-GET  /api/health — Healthcheck and uptime monitor
+Method| Endpoint| Purpose
+GET| "/search"| Search published content
+POST| "/upload/signature"| Generate signed Cloudinary upload parameters
+GET| "/health"| Check backend health
 
 🚀 Local Development Setup
-1. Prerequisites
-Node.js 20+
 
-MongoDB instance (local or Atlas)
+Prerequisites
 
-Cloudinary account for media hosting
+- Node.js 20 or a compatible version supported by the installed dependencies.
+- npm.
+- A MongoDB Atlas database or local MongoDB instance.
+- A Cloudinary account for media uploads.
 
-2. Backend Setup
-Bash
+1. Clone the repository
+
+git clone <YOUR_REPOSITORY_URL>
+cd DevPostify-Nova
+
+Replace "<YOUR_REPOSITORY_URL>" with the actual Git repository URL.
+
+2. Configure the backend
+
 cd backend
 npm install
-cp .env.example .env
-# Fill in your MONGODB_URI, JWT_SECRET, and Cloudinary credentials
+
+Create a ".env" file by copying ".env.example", then configure the required values.
+
+Typical configuration includes:
+
+NODE_ENV=development
+PORT=5000
+CLIENT_URL=http://localhost:3000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_long_random_secret
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+Use the variable names and any additional required settings from the repository's "backend/.env.example". Never commit real credentials.
+
+Start the backend:
+
 npm run dev
-3. Frontend Setup
-Bash
+
+Keep this terminal running.
+
+3. Configure the frontend
+
+Open a second terminal:
+
 cd frontend
 npm install
-cp .env.example .env.local
+
+Create a ".env.local" file in the "frontend" directory containing:
+
+NEXT_PUBLIC_API_URL=http://localhost:5000/api
+
+If your backend uses a different local port, update the URL accordingly.
+
+Start the frontend:
+
 npm run dev
-The application will be live at http://localhost:3000.
+
+Open "http://localhost:3000" (http://localhost:3000).
+
+4. Available verification scripts
+
+Run the scripts from their respective directories.
+
+Backend:
+
+npm run type-check
+npm run build
+
+Frontend:
+
+npm run lint
+npm run build
+
+A successful local build does not replace production deployment checks or live end-to-end testing.
+
+🔐 Security Notes
+
+- Keep secrets in environment variables and never commit ".env" files.
+- Use HTTPS and correctly configured production origins when deploying.
+- Keep MongoDB credentials and Cloudinary API secrets on the backend.
+- The frontend API URL is public configuration, not a secret.
+- Verify cookie delivery, authentication, access control, uploads, and draft privacy in the deployed environment.
+
+📌 Project Status
+
+V1.1 development and implementation milestones are complete. The final production release milestone covers deployment verification, environment configuration, cross-domain cookie behavior, and end-to-end smoke testing.
+
+The project should be considered fully release-verified only after those production checks pass.
 
 📜 License
-Distributed under the MIT License.
-```
+
+This project is distributed under the MIT License. See "LICENSE" (LICENSE) for details.

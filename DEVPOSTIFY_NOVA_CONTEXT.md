@@ -1,213 +1,272 @@
-# DEVPOSTIFY NOVA — PROJECT CONTEXT
+DEVPOSTIFY NOVA — PROJECT CONTEXT
 
-> Source of truth for DevPostify Nova continuity. Keep this file current and concise.
-> The actual repository is the source of truth for implementation status.
-> Never mark work complete unless it was implemented and verification results are honestly recorded.
-> Workflow: PLAN → EXECUTE → VERIFY → TEST → COMMIT → REPORT → STOP.
+«Source of truth for DevPostify Nova continuity. Keep this file accurate and concise.
+The repository is the source of truth for implementation details.
+Never claim a command, test, deployment, or verification passed unless it actually did.
+Workflow: PLAN → EXECUTE → VERIFY → TEST → COMMIT → REPORT → STOP.»
 
 ---
 
-## 1. Project Identity
+1. Project Identity
 
-- **Public name:** DevPostify
-- **Development name:** DevPostify Nova
-- **Tagline:** Where Developers Build Their Identity.
-- **Product:** Developer-first professional technical publishing and identity platform.
-- **Vision:** Share technical knowledge, showcase expertise, build a professional developer identity, discover useful technical content, and save valuable posts.
-- **Experience:** Modern, premium, professional, developer-first, SaaS-quality—not a generic social-media clone.
+- Public name: DevPostify
+- Development name: DevPostify Nova
+- Tagline: Where Developers Build Their Identity.
+- Product: Developer-first professional technical publishing and identity platform.
+- Vision: Help developers share technical knowledge, showcase expertise, participate in focused discussions, discover useful content, and save valuable posts.
+- Experience: Premium, professional, developer-first, and SaaS-quality.
 - Old DevPostify is reference-only and must never become a dependency.
 
 ---
 
-## 2. Development Principles
+2. Development Principles
 
-- Keep V1/V1.1 scope locked; do not over-engineer.
+- Keep the V1/V1.1 scope locked. Do not introduce unrelated V2 features.
 - Prefer practical, maintainable, production-oriented solutions.
-- Workflow: **PLAN → EXECUTE → VERIFY → TEST → COMMIT → REPORT → STOP**.
-- Inspect actual code before assuming a task is missing or complete.
-- Never claim a build, test, deployment, or command passed unless it actually did.
-- After each milestone, update this file with completed work, actual verification, known issues, and next milestone.
-- Gemini implements step-by-step; ChatGPT helps with architecture, review, audits, and final polish.
-- The user explicitly starts the next milestone with: **“Done bhai ab next”**.
+- Inspect actual repository code before assuming something is missing or complete.
+- Record verification results honestly; distinguish passed, failed, skipped, and not verified.
+- Update this file after meaningful milestones.
+- Gemini handles implementation; ChatGPT supports architecture, audits, review, and final polish.
+- The user explicitly starts the next milestone with: “Done bhai ab next”.
 - Never automatically continue to another milestone.
 
 ---
 
-## 3. Locked V1 / V1.1 Feature Set
+3. Locked V1 / V1.1 Feature Set
 
-### Authentication
+Authentication
 
-- Register with 8+ character password and alphanumeric username constraints
-- Login using email or username
-- Logout
-- JWT authentication using cross-domain HttpOnly cookies (`devpostify_token`)
-- Protected routes
+- Register with password and username validation.
+- Sign in using email or username.
+- Logout and protected routes.
+- JWT authentication through cross-domain HttpOnly cookies named "devpostify_token".
 
-### Developer Profiles
+Developer Profiles
 
-- Public profile by username
-- Edit name, bio, skills, specialties, GitHub, LinkedIn, and website
-- Cloudinary avatar uploads
-- Published-post listing
+- Public profiles accessible by username.
+- Edit profile information, bio, skills, specialties, and social links.
+- GitHub, LinkedIn, and personal website links.
+- Cloudinary avatar uploads.
+- Published-post listings.
 
-### Publishing
+Publishing
 
-- Create, view, edit, and delete own posts
-- Markdown editor with write/preview tabs
-- `react-markdown`, `remark-gfm`, Prism code highlighting
-- Five locked categories: `webdev`, `architecture`, `devops`, `opensource`, `ai`
-- Cloudinary cover-image upload
-- Private draft support
+- Create, view, edit, and delete posts.
+- Markdown editor with Write and Preview modes.
+- "react-markdown", "remark-gfm", and Prism syntax highlighting.
+- Five locked categories: "webdev", "architecture", "devops", "opensource", "ai".
+- Cloudinary cover-image uploads.
+- Private drafts and a dedicated "/drafts" management page.
 
-### Engagement
+Engagement
 
-- Post reaction toggle and counters (atomic concurrency protected)
-- Flat, single-level comments
-- Author-only comment deletion
-- Optimistic reaction/comment UI
+- Post reaction toggle and reaction counters.
+- Flat, single-level comments.
+- Author-only comment deletion.
+- Optimistic UI updates for supported interactions.
 
-### Notifications
+Notifications
 
-- Persisted reaction/comment notifications; self-actions excluded
-- Navbar unread badge
-- `/notifications` activity feed
-- Mark one/all as read
-- Deep links (polling/request-driven, no WebSockets)
+- Persisted reaction and comment notifications; self-actions excluded.
+- Navbar unread badge and "/notifications" activity feed.
+- Mark one or all notifications as read.
+- Deep links to relevant content.
+- Request-driven updates; WebSockets are not part of V1.1.
 
-### Discovery and Bookmarks
+Discovery and Bookmarks
 
-- Latest / Top Insights sort
-- Category and tag filters
-- Search with input-length limits and regex sanitization (ReDoS protected)
-- Bookmark/unbookmark
-- `/bookmarks`
+- Latest and Top Insights sorting.
+- Category and tag filters.
+- Search with input validation and regex safeguards.
+- Bookmark/unbookmark actions and "/bookmarks".
 
-### Settings and UX
+Settings and UX
 
-- Dark mode as the locked default (`#020617`)
-- Account overview/session termination
-- Accessible navigation and mobile drawer with aria attributes and scroll locking
-- Loading/skeleton, empty, error boundaries (`error.tsx`), 404 (`not-found.tsx`), and toast states
-
----
-
-## 4. Explicitly Out of Scope
-
-Do not add WebSockets/Socket.IO, chat/DMs, AI integrations, communities/teams, full GitHub sync/OAuth, nested comments, voice/video, followers/following, recommendation engines, unnecessary infrastructure, or unrelated V2 features.
+- Dark-mode-first design with background "#020617".
+- Account overview and session-related controls.
+- Responsive layouts and mobile navigation.
+- Accessible navigation controls and keyboard interactions.
+- Loading skeletons, empty states, error handling, error boundaries, 404 handling, and toast feedback.
 
 ---
 
-## 5. Design System
+4. Explicitly Out of Scope
 
-- Primary: `#2563EB`
-- Accent: `#7C3AED`
-- Brand gradient: blue → violet
-- Background: `#020617`
+Do not add WebSockets/Socket.IO, chat or DMs, AI integrations, communities or teams, full GitHub sync/OAuth, nested comments, voice/video, followers/following, recommendation engines, unnecessary infrastructure, or unrelated V2 features.
+
+---
+
+5. Design System
+
+- Primary: "#2563EB"
+- Accent: "#7C3AED"
+- Brand gradient: Blue to violet
+- Background: "#020617"
 - Typography: Poppins headings, Inter body, JetBrains Mono code
 - Spacing: 8px system
-- Radius: cards 16px; buttons/inputs 12px
-- Preserve the existing identity; polish only where needed.
+- Radius: 16px cards; 12px buttons and inputs
+- Preserve the established visual identity. Only make changes needed for correctness, usability, accessibility, or release quality.
 
 ---
 
-## 6. Locked Tech Stack and Architecture
+6. Tech Stack and Architecture
 
-- **Frontend:** Next.js App Router, React 19, strict TypeScript, Tailwind CSS, Lucide React, `react-markdown`, `remark-gfm`, Prism.
-- **Backend:** Node.js, Express, TypeScript, JWT (`jsonwebtoken`), `cookie-parser`, Mongoose, Zod, Cloudinary SDK, Helmet, `express-rate-limit`.
-- **Database/deployment:** MongoDB Atlas, Vercel frontend, Render backend.
+- Frontend: Next.js App Router, React 19, strict TypeScript, Tailwind CSS 4, Lucide React, "react-markdown", "remark-gfm", Prism.
+- Backend: Node.js, Express 5, TypeScript, JWT ("jsonwebtoken"), "cookie-parser", Mongoose, Zod, Cloudinary SDK, Helmet, "express-rate-limit".
+- Database: MongoDB Atlas.
+- Media: Cloudinary.
+- Deployment targets: Vercel frontend and Render backend.
 
-```text
-Next.js frontend
-      ↓ HTTPS REST API
-Express backend
-      ↓ Mongoose
+Next.js Frontend
+|
+| HTTPS REST API
+| HttpOnly Cookies + CORS
+v
+Express Backend
+|
+| Mongoose
+v
 MongoDB Atlas
-Do not replace this architecture.
+
+Express Backend ---- Signed Uploads ----> Cloudinary
+
+Do not replace the architecture or introduce infrastructure without a concrete need.
+
+---
 
 7. Database Collections
-users: credentials, bio, avatar, skills, specialties, socials
 
-posts: content, category, tags, cover image, isDraft, reaction/comment counters, author
+- users: Credentials, profile information, bio, avatar, skills, specialties, and social links.
+- posts: Content, category, tags, cover image, draft status, reaction/comment counters, and author reference.
+- bookmarks: User/post references; unique compound index on "{ user: 1, post: 1 }".
+- reactions: User/post references; unique compound index on "{ user: 1, post: 1 }".
+- comments: Post, author, content, and creation time; index on "{ post: 1, createdAt: -1 }".
+- notifications: Recipient, sender, type ("reaction" or "comment"), related post/comment references, and read status.
 
-bookmarks: user/post references; unique compound index { user: 1, post: 1 }
-
-reactions: user/post references; unique compound index { user: 1, post: 1 }
-
-comments: post, author, content; index { post: 1, createdAt: -1 }
-
-notifications: recipient, sender, type (reaction | comment), post/comment references, isRead
+---
 
 8. REST API Inventory
-Auth: POST /api/auth/register, POST /api/auth/login, POST /api/auth/logout, GET /api/auth/me
 
-Posts: GET /api/posts, GET /api/posts/:id, POST /api/posts, PATCH /api/posts/:id, DELETE /api/posts/:id
+All routes use the "/api" prefix.
 
-Reactions: POST /api/posts/:id/react, GET /api/posts/:id/react
+- Authentication: "POST /auth/register", "POST /auth/login", "POST /auth/logout", "GET /auth/me"
+- Posts: "GET /posts", "GET /posts/:id", "POST /posts", "PATCH /posts/:id", "DELETE /posts/:id"
+- Reactions: "POST /posts/:id/react", "GET /posts/:id/react"
+- Comments: "GET /posts/:id/comments", "POST /posts/:id/comments", "DELETE /comments/:commentId"
+- Profiles: "GET /profile/:username", "PATCH /profile"
+- Notifications: "GET /notifications", "GET /notifications/unread-count", "PATCH /notifications/:id/read", "PATCH /notifications/read-all"
+- Bookmarks: "GET /bookmarks", "POST /bookmarks/:postId", "DELETE /bookmarks/:postId"
+- Uploads: "POST /upload/signature"
+- Search: "GET /search"
+- Health: "GET /health"
 
-Comments: GET /api/posts/:id/comments, POST /api/posts/:id/comments, DELETE /api/comments/:commentId
+The implemented route definitions and validators remain authoritative if this inventory ever differs from the source code.
 
-Profile: GET /api/profile/:username, PATCH /api/profile
+---
 
-Notifications: GET /api/notifications, GET /api/notifications/unread-count, PATCH /api/notifications/read-all, PATCH /api/notifications/:id/read
+9. Milestone History and Status
 
-Upload: POST /api/upload/signature
+Milestones 1–27 — Core V1 and V1.1 Feature Foundation: COMPLETE.
 
-Bookmarks: GET /api/bookmarks, POST /api/bookmarks/:postId, DELETE /api/bookmarks/:postId
+Core application foundations, publishing, profiles, media workflows, engagement, discovery, notifications, editing, and responsive navigation were implemented.
 
-System: GET /api/search, GET /api/health
+Milestones 28–36 — Security, Data Integrity, and Reliability: COMPLETE.
 
-9. Milestone History & Status
-Milestones 1–27 — Core V1 & V1.1 Feature Foundation
-COMPLETE & VERIFIED. Models, Cloudinary media pipeline, profile extensions, reactions, flat comments, discovery/drafts persistence, notification center base, edit post, cover flow, and responsive drawer.
+- M28 — Auth-Aware Public Routes: Optional authentication for public-route personalization.
+- M29 — Draft Privacy: Drafts excluded from public discovery and restricted to their owner.
+- M30 — Draft Management: Protected draft workflow for editing, publishing, and deletion.
+- M31 — Delete/Cascade Integrity: Dependent-record cleanup for post deletion.
+- M32 — Reaction/Comment Consistency: Concurrency and counter-consistency improvements.
+- M33 — TypeScript and Code Quality: Type safety and removal of unnecessary explicit "any" bypasses.
+- M34 — Upload and Input Validation: Upload-folder restrictions and normalized tag validation.
+- M35 — API Security: Security headers, rate limits, origin checks, and database startup handling.
+- M36 — Notification UX and Reliability: Read-state handling, navigation, and unread-count behavior.
 
-Milestone 28 — Auth-Aware Public Routes
-COMPLETE & VERIFIED. Public GET routes support optional authentication for personalization states while keeping anonymous access working.
+Milestones 37–39 — Product Polish and Documentation: COMPLETE.
 
-Milestone 29 — Draft Privacy Boundaries
-COMPLETE & VERIFIED. Drafts strictly isolated from public feeds, search results, bookmarks, and non-owner access at the database level (isDraft: { $ne: true }).
+- M37 — Premium Home Hero: Home hero, capability strip, ambient styling, and feed navigation.
+- M38 — Documentation, Environment Contracts, and Licensing: README, environment configuration documentation, and MIT license.
+- M39 — Responsive and Accessibility Audit: Mobile navigation accessibility, Escape-key handling, and body scroll locking.
 
-Milestone 30 — Draft Management Workflow
-COMPLETE & VERIFIED. Dedicated protected /drafts route with edit, publish, and delete actions restricted strictly to the author.
+M40 — Full Verification and Pre-Release Preparation: COMPLETE, according to the latest project status.
 
-Milestone 31 — Delete / Cascade Integrity
-COMPLETE & VERIFIED. Deleting posts cleans dependent reactions, comments, bookmarks, and notifications safely with atomic transactions.
+The implementation and local verification phase is reported complete. The recorded verification checklist includes backend type-check/build, frontend lint/build, and metadata/production-asset review. Preserve the actual command outputs as the definitive evidence; do not claim a check passed if its result cannot be confirmed.
 
-Milestone 32 — Reaction / Comment Concurrency & Consistency
-COMPLETE & VERIFIED. Atomic operations ($inc), unique compound indexes, and synchronized counts prevent race conditions.
+M41 — Production Release, End-to-End Testing, and V1.1 Freeze: NEXT AND ONLY REMAINING MILESTONE.
 
-Milestone 33 — TypeScript and Code Quality
-COMPLETE & VERIFIED. Removed explicit as any type bypasses across components. Both frontend and backend compile strictly.
+No new features are planned. Focus exclusively on release readiness, deployment, end-to-end testing, fixes for confirmed blockers, and final sign-off.
 
-Milestone 34 — Upload & Input Validation Hardening
-COMPLETE & VERIFIED. Cloudinary signed upload restricted to whitelisted folders (devpostify/covers, devpostify/avatars). Tags normalized (max 5, max 30 chars, lowercase, alphanumeric/dashes). Safe URL boundaries enforced.
+---
 
-Milestone 35 — API Security & Abuse Protection
-COMPLETE & VERIFIED. Mounted helmet, configured express-rate-limit (general, auth, upload tiers), verified origin headers against CLIENT_URL for state mutations, and locked explicit database startup sequence.
+10. M41 — Release Checklist
 
-Milestone 36 — Notification Reliability and UX
-COMPLETE & VERIFIED. Click-to-read routing, semantic reaction vs comment styling, archived post fallbacks, and unread counters verified.
+A. Environment and Deployment
 
-Milestone 37 — Premium Home Hero
-COMPLETE & VERIFIED. Added SaaS-level hero with ambient glow, capability strip, and smooth #articles-feed anchor navigation without feed disruption.
+- [ ] Verify the final source and committed changes.
+- [ ] Verify all required Render backend environment variables.
+- [ ] Verify all required Vercel frontend environment variables, including "NEXT_PUBLIC_API_URL".
+- [ ] Confirm "CLIENT_URL" matches the deployed frontend origin.
+- [ ] Confirm MongoDB Atlas connectivity and database permissions.
+- [ ] Confirm Cloudinary credentials and signed upload configuration.
+- [ ] Deploy or verify the backend on Render.
+- [ ] Deploy or verify the frontend on Vercel.
+- [ ] Confirm the production health endpoint returns the expected result.
 
-Milestone 38 — Documentation, Env Contracts & Licensing
-COMPLETE & VERIFIED. Root README.md synchronized with exact architecture and REST API inventory, added root LICENSE (MIT), and verified .env.example configurations.
+B. Authentication and Cookie Behavior
 
-Milestone 39 — Responsive and Accessibility (A11y) Audit
-COMPLETE & VERIFIED. Audited semantic landmarks, added aria-expanded and aria-controls to mobile menu toggle, enforced aria-label="Mobile Navigation", and polished escape-key handling and body scroll locking.
+- [ ] Register and log in with valid credentials.
+- [ ] Verify invalid credentials and validation errors.
+- [ ] Verify email and username login as supported.
+- [ ] Confirm the production HttpOnly cookie is issued with appropriate "Secure", "SameSite", domain, and credentialed-CORS behavior for the actual deployment.
+- [ ] Verify protected routes reject unauthenticated requests.
+- [ ] Verify logout clears the session correctly.
 
-Milestone 40 — Full Verification & Pre-Release Run
-COMPLETE & VERIFIED. Ran clean npm run type-check and npm run build on backend (0 errors). Ran clean npm run lint and npm run build on frontend (0 errors, 0 warnings). OpenGraph, Twitter cards, metadata base, and production asset optimizations verified.
+C. Publishing and Draft Privacy
 
-10. Next Milestone
-Milestone 41 — Production Release & V1.1 Freeze 🔒 (NEXT)
-Deploy backend to Render and frontend to Vercel.
+- [ ] Create, edit, view, and delete a post.
+- [ ] Create and update a draft, then publish it.
+- [ ] Verify drafts do not appear in public feeds, search, or bookmarks.
+- [ ] Verify anonymous users and other users cannot access another user's private drafts.
+- [ ] Verify cover-image uploads and invalid upload requests.
 
-Verify production environment variables (CLIENT_URL, MONGODB_URI, JWT_SECRET, CLOUDINARY_*, NEXT_PUBLIC_API_URL).
+D. Profiles, Engagement, and Discovery
 
-Verify cross-domain HttpOnly cookie delivery in production browsers.
+- [ ] Update and view a developer profile.
+- [ ] Verify reactions and reaction counters.
+- [ ] Add and delete comments according to authorization rules.
+- [ ] Verify notifications, unread counts, read actions, and deep links.
+- [ ] Verify search, category/tag filtering, sorting, and bookmarks.
+- [ ] Verify post deletion and cleanup of dependent records.
+- [ ] Test validation errors and relevant concurrent interaction cases.
 
-Smoke test live URLs.
+E. UX, Accessibility, and Stability
 
-Mark DEVPOSTIFY NOVA V1.1 — COMPLETE & FROZEN.
-```
+- [ ] Test desktop and mobile layouts.
+- [ ] Test mobile navigation, keyboard interactions, and Escape-key handling.
+- [ ] Check loading, empty, error, and toast states.
+- [ ] Inspect browser console and production network requests.
+- [ ] Verify important links, refresh behavior, and direct navigation to nested routes.
+- [ ] Check backend logs for unexpected errors.
+
+F. Final Sign-Off
+
+- [ ] Record the actual production test results.
+- [ ] Fix and retest confirmed release blockers.
+- [ ] Confirm the deployed frontend and backend work together.
+- [ ] Update this context file with the final verified results and any known limitations.
+- [ ] Commit final documentation/status changes.
+- [ ] Mark DEVPOSTIFY NOVA V1.1 — COMPLETE & FROZEN only after the release checks pass.
+
+Do not add features during M41. Fix only confirmed release blockers and avoid unnecessary refactoring.
+
+---
+
+11. Current State and Next Action
+
+- V1/V1.1 feature implementation is complete.
+- M40 is recorded as complete in the latest project status.
+- M41 is the only remaining milestone.
+- Production deployment, end-to-end testing, and final release verification must be recorded after they are actually performed.
+- Next action: execute M41, report actual results, resolve confirmed blockers, and freeze V1.1 after successful verification.
+
+Final project status must reflect evidence, not assumptions.
