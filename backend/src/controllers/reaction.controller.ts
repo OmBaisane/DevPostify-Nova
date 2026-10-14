@@ -90,7 +90,7 @@ export const toggleReaction = asyncHandler(
                 sender: userId,
                 type: "reaction",
                 post: post._id,
-                read: false,
+                isRead: false,
               },
             },
             { upsert: true, new: true },

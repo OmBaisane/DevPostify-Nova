@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { UserModel } from "../models/User.js";
 import { PostModel } from "../models/Post.js";
+import { ReactionModel } from "../models/Reaction.js";
 import { updateProfileSchema } from "../validators/profile.validator.js";
 import { sendSuccess } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -47,6 +48,27 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
     .populate("author", "name username avatar")
     .lean();
 
+  // Enrich posts with current viewer's reaction state (Fix for empty heart on profile)
+  let enrichedPosts = posts as unknown as Array<Record<string, unknown>>;
+  if (req.userId && posts.length > 0) {
+    const postIds = posts.map((p) => p._id);
+    const userReactions = await ReactionModel.find({
+      user: req.userId,
+      post: { $in: postIds },
+    })
+      .select("post")
+      .lean();
+
+    const reactedSet = new Set(userReactions.map((r) => r.post.toString()));
+
+    enrichedPosts = posts.map((p) => ({
+      ...(p as unknown as Record<string, unknown>),
+      isReactedByMe: reactedSet.has(
+        (p._id as { toString: () => string }).toString(),
+      ),
+    }));
+  }
+
   return sendSuccess(res, 200, "Profile fetched successfully", {
     user: {
       _id: user._id,
@@ -60,7 +82,7 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
       socials: user.socials || { github: "", linkedin: "", website: "" },
       createdAt: user.createdAt,
     },
-    posts,
+    posts: enrichedPosts,
     postsCount: posts.length,
     isOwner,
   });

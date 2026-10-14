@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -34,7 +34,7 @@ interface NotificationItem {
     _id: string;
     content: string;
   } | null;
-  read: boolean;
+  isRead: boolean;
   createdAt: string;
 }
 
@@ -103,7 +103,7 @@ export default function NotificationsPage() {
     try {
       await api.patch(`/notifications/${id}/read`);
       setNotifications((prev) =>
-        prev.map((n) => (n._id === id ? { ...n, read: true } : n)),
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n)),
       );
       if (redirectUrl) {
         router.push(redirectUrl);
@@ -116,12 +116,12 @@ export default function NotificationsPage() {
   };
 
   const handleMarkAllRead = async () => {
-    if (notifications.every((n) => n.read)) return;
+    if (notifications.every((n) => n.isRead)) return;
 
     try {
       setMarkingAll(true);
       await api.patch("/notifications/read-all");
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       toast("All notifications marked as read", "success");
     } catch (err: unknown) {
       const msg =
@@ -132,7 +132,7 @@ export default function NotificationsPage() {
     }
   };
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
     <ProtectedRoute>
@@ -211,7 +211,7 @@ export default function NotificationsPage() {
                   key={item._id}
                   onClick={() => handleMarkAsRead(item._id, redirectUrl)}
                   className={`p-4 sm:p-5 rounded-2xl border transition flex items-start justify-between gap-4 cursor-pointer ${
-                    item.read
+                    item.isRead
                       ? "bg-slate-950/40 border-slate-800/80 hover:border-slate-700 opacity-80 hover:opacity-100"
                       : "bg-slate-900/70 border-blue-500/30 hover:border-blue-500/50 shadow-md shadow-blue-950/20"
                   }`}
@@ -274,7 +274,7 @@ export default function NotificationsPage() {
                   </div>
 
                   <div className="shrink-0 flex items-center gap-2">
-                    {!item.read && (
+                    {!item.isRead && (
                       <span className="w-2 h-2 rounded-full bg-blue-500" />
                     )}
                     {redirectUrl && (
