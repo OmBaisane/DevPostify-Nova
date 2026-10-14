@@ -1,19 +1,28 @@
 import { Post } from "./post";
 
+export interface ProfileSocials {
+  github?: string;
+  linkedin?: string;
+  website?: string;
+}
+
 export interface ProfileUser {
-  _id: string;
+  _id?: string;
   id?: string;
-  name: string;
   username: string;
-  email?: string;
-  avatar?: string;
+  name: string;
   bio?: string;
+  avatar?: string;
+  skills?: string[];
+  specialties?: string[];
+  socials?: ProfileSocials;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface ProfileResponseData {
-  profile?: ProfileUser;
   user?: ProfileUser;
+  profile?: ProfileUser;
   posts: Post[];
+  postsCount: number;
+  isOwner?: boolean;
 }

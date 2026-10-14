@@ -10,6 +10,8 @@ import {
   Loader2,
   FolderCode,
   ArrowLeft,
+  Sparkles,
+  Code2,
 } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/common/SocialIcons";
 import { api, ApiError } from "@/lib/api";
@@ -18,6 +20,14 @@ import { ProfileResponseData, ProfileUser } from "@/types/profile";
 import { Post } from "@/types/post";
 import PostCard from "@/components/posts/PostCard";
 import EditProfileModal from "@/components/profile/EditProfileModal";
+
+function formatUrl(url: string) {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  return `https://${url}`;
+}
 
 export default function ProfilePage() {
   const params = useParams();
@@ -101,6 +111,14 @@ export default function ProfilePage() {
 
   const isOwner = currentUser?.username === profile.username;
 
+  const hasSpecialties =
+    Array.isArray(profile.specialties) && profile.specialties.length > 0;
+  const hasSkills = Array.isArray(profile.skills) && profile.skills.length > 0;
+  const hasSocials =
+    Boolean(profile.socials?.github) ||
+    Boolean(profile.socials?.linkedin) ||
+    Boolean(profile.socials?.website);
+
   return (
     <main className="max-w-4xl mx-auto px-4 py-8">
       {/* Profile Bio Card */}
@@ -161,37 +179,77 @@ export default function ProfilePage() {
           </p>
         )}
 
+        {/* Engineering Specialties */}
+        {hasSpecialties && (
+          <div className="mt-6 pt-5 border-t border-slate-800/80">
+            <h3 className="text-[11px] font-mono uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+              <span>Specialties & Focus</span>
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {profile.specialties?.map((spec: string, idx: number) => (
+                <span
+                  key={`${spec}-${idx}`}
+                  className="px-3 py-1 rounded-xl text-xs font-medium bg-purple-500/10 text-purple-300 border border-purple-500/20"
+                >
+                  {spec}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Core Technical Skills */}
+        {hasSkills && (
+          <div className="mt-5">
+            <h3 className="text-[11px] font-mono uppercase tracking-wider text-slate-500 mb-2.5 flex items-center gap-1.5">
+              <Code2 className="w-3.5 h-3.5 text-blue-400" />
+              <span>Tech Stack & Skills</span>
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {profile.skills?.map((skill: string, idx: number) => (
+                <span
+                  key={`${skill}-${idx}`}
+                  className="px-3 py-1 rounded-xl text-xs font-medium bg-slate-800/80 text-slate-300 border border-slate-700/80"
+                >
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Social Links */}
-        {currentUser?.socials && (
-          <div className="flex items-center gap-3 mt-6 pt-6 border-t border-slate-800">
-            {currentUser.socials.github && (
+        {hasSocials && (
+          <div className="flex items-center gap-3 mt-6 pt-5 border-t border-slate-800">
+            {profile.socials?.github && (
               <a
-                href={currentUser.socials.github}
+                href={formatUrl(profile.socials.github)}
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white transition"
+                className="p-2.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:border-slate-700 transition"
                 aria-label="GitHub Profile"
               >
                 <GithubIcon className="w-4 h-4" />
               </a>
             )}
-            {currentUser.socials.linkedin && (
+            {profile.socials?.linkedin && (
               <a
-                href={currentUser.socials.linkedin}
+                href={formatUrl(profile.socials.linkedin)}
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white transition"
+                className="p-2.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:border-slate-700 transition"
                 aria-label="LinkedIn Profile"
               >
                 <LinkedinIcon className="w-4 h-4" />
               </a>
             )}
-            {currentUser.socials.website && (
+            {profile.socials?.website && (
               <a
-                href={currentUser.socials.website}
+                href={formatUrl(profile.socials.website)}
                 target="_blank"
                 rel="noreferrer"
-                className="p-2 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white transition"
+                className="p-2.5 rounded-xl border border-slate-800 bg-slate-900 text-slate-400 hover:text-white hover:border-slate-700 transition"
                 aria-label="Personal Website"
               >
                 <Globe className="w-4 h-4" />
