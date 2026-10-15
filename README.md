@@ -6,12 +6,14 @@ DevPostify Nova is a developer-first professional technical publishing and ident
 
 The project focuses on a polished developer experience, maintainable architecture, secure authentication, and practical full-stack engineering.
 
+---
+
 ✨ Core Features
 
 Authentication & Security
 
 - Register and sign in using email or username.
-- JWT-based authentication using cross-domain HttpOnly cookies.
+- JWT-based authentication using cross-domain HttpOnly cookies ("devpostify_token").
 - Security headers powered by Helmet.
 - Origin verification for state-changing requests.
 - Rate limiting for general API traffic, authentication, and media uploads.
@@ -20,10 +22,10 @@ Technical Publishing
 
 - Create, edit, view, and delete technical posts.
 - Markdown editor with Write and Preview modes.
-- GitHub Flavored Markdown and syntax highlighting.
+- GitHub Flavored Markdown through "remark-gfm" and syntax highlighting with Prism.
 - Five supported categories: "webdev", "architecture", "devops", "opensource", and "ai".
 - Cover-image uploads through signed Cloudinary uploads.
-- Private drafts with a dedicated draft-management dashboard.
+- Private drafts with database-level access restrictions and a dedicated "/drafts" dashboard.
 
 Developer Profiles
 
@@ -31,16 +33,15 @@ Developer Profiles
 - Profile editing for bio, skills, specialties, and social links.
 - GitHub, LinkedIn, and personal website links.
 - Cloudinary-powered avatar uploads.
-- Published-post listings on developer profiles.
+- Published-post listings with viewer-aware reaction states.
 
 Engagement & Notifications
 
-- Post reactions with optimistic UI updates.
-- Flat, single-level comment discussions.
-- Author-only comment deletion.
-- Persistent reaction and comment notifications.
-- Unread notification counts and mark-as-read actions.
-- Notification links to relevant posts.
+- Post reactions with optimistic UI updates and concurrency protections.
+- Flat, single-level technical discussions with author-only comment deletion.
+- Persistent reaction and comment notifications, excluding self-actions.
+- Unread notification counters and mark-as-read actions.
+- Deep links to relevant posts.
 
 Discovery & Bookmarks
 
@@ -48,27 +49,30 @@ Discovery & Bookmarks
 - Category and tag filtering.
 - Search with input validation and regex safeguards.
 - Bookmark and unbookmark functionality.
-- Dedicated bookmarks page.
+- Dedicated "/bookmarks" page with viewer-aware reaction states.
 
 User Experience
 
-- Dark-mode-first visual design.
-- Responsive layouts and mobile navigation.
-- Loading skeletons, empty states, error handling, and toast feedback.
-- Accessible navigation controls and keyboard interactions.
+- Dark-mode-first visual design with "#020617" background.
+- Responsive layouts and accessible mobile navigation.
+- Loading skeletons, empty states, error boundaries, and toast feedback.
+
+---
 
 🛠️ Tech Stack
 
 Layer| Technologies
-Frontend| Next.js 16 (App Router), React 19, TypeScript
+Frontend| Next.js 16 App Router, React 19, TypeScript
 Styling & UI| Tailwind CSS 4, Lucide React
-Markdown| "react-markdown", "remark-gfm", Prism syntax highlighting
+Markdown| "react-markdown", "remark-gfm", Prism.js
 Backend| Node.js, Express 5, TypeScript
 Validation & Security| Zod, JWT, "cookie-parser", Helmet, "express-rate-limit"
 Database| MongoDB Atlas, Mongoose
-Media| Cloudinary
+Media| Cloudinary signed uploads
 Frontend Deployment| Vercel
 Backend Deployment| Render
+
+---
 
 🏗️ Architecture
 
@@ -88,54 +92,58 @@ Backend Deployment| Render
 ▼ ▼
 ┌──────────────────┐ ┌──────────────────┐
 │ MongoDB Atlas │ │ Cloudinary CDN │
-│ Application Data│ │ Media Uploads │
+│ Application Data │ │ Media Uploads │
 └──────────────────┘ └──────────────────┘
 
-📡 REST API Overview
+---
 
-All routes below use the "/api" prefix.
+📡 REST API Reference
+
+All endpoints below use the "/api" prefix.
 
 Authentication
 
 Method| Endpoint| Purpose
 POST| "/auth/register"| Create an account
-POST| "/auth/login"| Sign in
+POST| "/auth/login"| Sign in with email or username
 POST| "/auth/logout"| Clear the session cookie
-GET| "/auth/me"| Retrieve the current authenticated user
+GET| "/auth/me"| Retrieve the authenticated user
 
-Posts
+Posts & Drafts
 
 Method| Endpoint| Purpose
 GET| "/posts"| Retrieve the published feed
 GET| "/posts/:id"| Retrieve a post, subject to access rules
-POST| "/posts"| Create a post or draft
+POST| "/posts"| Create a post or private draft
 PATCH| "/posts/:id"| Update a post or publish a draft
 DELETE| "/posts/:id"| Delete a post and its dependent records
-
-The feed supports discovery options such as category, tag, and sorting where applicable.
 
 Reactions & Comments
 
 Method| Endpoint| Purpose
-POST| "/posts/:id/react"| Toggle a reaction
+POST| "/posts/:id/react"| Toggle a post reaction
 GET| "/posts/:id/react"| Retrieve the current user's reaction status
-GET| "/posts/:id/comments"| Retrieve post comments
+GET| "/posts/:id/comments"| Retrieve comments
 POST| "/posts/:id/comments"| Add a comment
 DELETE| "/comments/:commentId"| Delete an eligible comment
 
 Developer Profiles
 
 Method| Endpoint| Purpose
-GET| "/profile/:username"| Retrieve a developer profile
+GET| "/profile/:username"| Retrieve a developer profile and published posts
 PATCH| "/profile"| Update the authenticated user's profile
 
-Notifications & Bookmarks
+Notifications
 
 Method| Endpoint| Purpose
-GET| "/notifications"| Retrieve notifications
-GET| "/notifications/unread-count"| Retrieve the unread count
+GET| "/notifications"| Retrieve the notification stream
+GET| "/notifications/unread-count"| Retrieve the unread notification count
 PATCH| "/notifications/:id/read"| Mark a notification as read
 PATCH| "/notifications/read-all"| Mark all notifications as read
+
+Bookmarks
+
+Method| Endpoint| Purpose
 GET| "/bookmarks"| Retrieve bookmarked posts
 POST| "/bookmarks/:postId"| Bookmark a post
 DELETE| "/bookmarks/:postId"| Remove a bookmark
@@ -147,30 +155,36 @@ GET| "/search"| Search published content
 POST| "/upload/signature"| Generate signed Cloudinary upload parameters
 GET| "/health"| Check backend health
 
+---
+
 🚀 Local Development Setup
 
 Prerequisites
 
 - Node.js 20 or a compatible version supported by the installed dependencies.
 - npm.
-- A MongoDB Atlas database or local MongoDB instance.
+- A MongoDB Atlas cluster or local MongoDB instance.
 - A Cloudinary account for media uploads.
 
 1. Clone the repository
 
+Clone the repository using your actual Git remote URL:
+
 git clone <YOUR_REPOSITORY_URL>
 cd DevPostify-Nova
 
-Replace "<YOUR_REPOSITORY_URL>" with the actual Git repository URL.
+Replace "<YOUR_REPOSITORY_URL>" with the repository's real clone URL.
 
 2. Configure the backend
+
+Open a terminal in the repository root:
 
 cd backend
 npm install
 
-Create a ".env" file by copying ".env.example", then configure the required values.
+Create a ".env" file based on "backend/.env.example". Configure the required values, including your database connection, JWT secret, client origin, and Cloudinary credentials.
 
-Typical configuration includes:
+Typical local values look like this:
 
 NODE_ENV=development
 PORT=5000
@@ -181,7 +195,7 @@ CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
 
-Use the variable names and any additional required settings from the repository's "backend/.env.example". Never commit real credentials.
+Use the exact variable names and any additional settings documented in the actual backend environment example.
 
 Start the backend:
 
@@ -191,16 +205,19 @@ Keep this terminal running.
 
 3. Configure the frontend
 
-Open a second terminal:
+Open a second terminal from the repository root:
 
 cd frontend
 npm install
 
-Create a ".env.local" file in the "frontend" directory containing:
+Create "frontend/.env.local" based on "frontend/.env.example".
+
+Typical local values:
 
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-If your backend uses a different local port, update the URL accordingly.
+Use the correct deployed frontend origin for "NEXT_PUBLIC_APP_URL" in the production environment. "NEXT_PUBLIC_API_URL" must point to the deployed backend API when running in production.
 
 Start the frontend:
 
@@ -208,36 +225,52 @@ npm run dev
 
 Open "http://localhost:3000" (http://localhost:3000).
 
-4. Available verification scripts
+«Run the frontend and backend in separate terminals. Never commit real ".env" or ".env.local" files or expose private credentials.»
 
-Run the scripts from their respective directories.
+---
 
-Backend:
+🧪 Verification Scripts
 
+Run the commands from their respective project directories.
+
+Backend
+
+cd backend
 npm run type-check
 npm run build
 
-Frontend:
+Frontend
 
+cd frontend
 npm run lint
 npm run build
 
-A successful local build does not replace production deployment checks or live end-to-end testing.
+Use the scripts defined in each directory's "package.json". A successful local build does not replace production smoke tests or end-to-end verification.
+
+---
 
 🔐 Security Notes
 
-- Keep secrets in environment variables and never commit ".env" files.
-- Use HTTPS and correctly configured production origins when deploying.
+- Keep secrets in environment variables and never commit them to the repository.
+- Use HTTPS and correctly configured production origins.
+- Configure cross-domain authentication cookies and credentialed CORS consistently with the deployed frontend and backend.
 - Keep MongoDB credentials and Cloudinary API secrets on the backend.
-- The frontend API URL is public configuration, not a secret.
-- Verify cookie delivery, authentication, access control, uploads, and draft privacy in the deployed environment.
+- Treat "NEXT*PUBLIC*\*" variables as public configuration; never place secrets in them.
+- Enforce upload restrictions through trusted server-side/provider-side controls, not browser validation alone.
+- Verify authentication, authorization, draft privacy, upload restrictions, and session behavior in the deployed environment.
+
+---
 
 📌 Project Status
 
-V1.1 development and implementation milestones are complete. The final production release milestone covers deployment verification, environment configuration, cross-domain cookie behavior, and end-to-end smoke testing.
+DevPostify Nova V1.1 — COMPLETE & FROZEN.
 
-The project should be considered fully release-verified only after those production checks pass.
+The project owner reports completion of the feature implementation, hardening, deployment, and final release-verification milestones. No additional V1.1 features or scope expansions are planned.
+
+Any future work should be treated as a separately scoped maintenance task or a new version.
+
+---
 
 📜 License
 
-This project is distributed under the MIT License. See "LICENSE" (LICENSE) for details.
+This project is licensed under the MIT License. See "LICENSE" (LICENSE) for details.
